@@ -333,11 +333,24 @@ const icons = [
     { top: 120, left: 350 }
   ),
   new Icon(
-    "Email",
-    () => (window.location.href = "mailto:andrew.park6126@gmail.com"),
-    "assets/icons/email.png",
-    { x: 0, y: 0 },
-    { top: 350, right: 150 }
+      "Email",
+      () => {
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          
+          if (isMobile) {
+              window.location.href = "mailto:andrew.park6126@gmail.com";
+          } else {
+              // Try to open Gmail, with mailto as fallback
+              try {
+                  window.open("https://mail.google.com/mail/?view=cm&fs=1&to=andrew.park6126@gmail.com", "_blank");
+              } catch (error) {
+                  window.location.href = "mailto:andrew.park6126@gmail.com";
+              }
+          }
+      },
+      "assets/icons/email.png",
+      { x: 0, y: 0 },
+      { top: 350, right: 150 }
   ),
   new Icon(
     "Spotify",

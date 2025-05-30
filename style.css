@@ -168,7 +168,7 @@ html {
 
 #start-button {
     border: 2px outset #fff;
-    color: white;
+    color: black;
     cursor: pointer;
     font-weight: bold;
     display: flex;
@@ -194,6 +194,7 @@ html {
 }
 
 #clock {
+    font-size: 0.9rem;
     color: black;
     text-align: center;
     display: flex;
