@@ -1,7 +1,8 @@
 // Window management
 function openWindow(id) {
   const win = document.getElementById(id);
-  win.style.display = 'block';
+  win.style.display = 'flex';
+  win.style.width = `${window.innerWidth/2}px`
   bringToFront(win);
 }
 
@@ -140,14 +141,14 @@ window.addEventListener('resize', function() {
   });
 });
 
-// Add some Easter eggs
+// Click easter egg (if you found this by scraping my script.js then it doesn't count)
 let clickCount = 0;
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('desktop').addEventListener('dblclick', function(e) {
     if (e.target === this) {
       clickCount++;
       if (clickCount === 3) {
-        alert('🎉 Easter Egg! You found the secret desktop message!\n\nThanks for exploring my portfolio!');
+        alert('🎉 ...Oh? You found the secret desktop message!\n\nThanks for exploring my portfolio!');
         clickCount = 0;
       }
     }
@@ -197,3 +198,4 @@ document.addEventListener('DOMContentLoaded', function () {
   const track = document.querySelector('.scrolling-track');
   track.innerHTML += track.innerHTML;
 });
+

@@ -11,42 +11,41 @@
   <div id="desktop">
     <!-- Icons -->
     <div class="icon" id="about-icon" onclick="openWindow('about-window')">
-      <img src="icons/user.png" alt="About">
+      <img src="assets/icons/about.png" alt="About">
       <span>About Me</span>
     </div>
     <div class="icon" id="projects-icon" onclick="openWindow('projects-window')">
-      <img src="icons/folder.png" alt="Projects">
+      <img src="assets/icons/projects.png" alt="Projects">
       <span>Projects</span>
     </div>
-    <div class="icon" id="skills-icon" onclick="openWindow('skills-window')">
-      <img src="icons/skills.png" alt="Skills">
-      <span>Skills</span>
+    <div class="icon" id="technologies-icon" onclick="openWindow('technologies-window')">
+      <img src="assets/icons/technologies.png" alt="Technologies">
+      <span>Technologies</span>
     </div>
     <div class="icon" id="experience-icon" onclick="openWindow('experience-window')">
-      <img src="icons/briefcase.png" alt="Experience">
+      <img src="assets/icons/experience.png" alt="Experience">
       <span>Experience</span>
     </div>
     <div class="icon" id="education-icon" onclick="openWindow('education-window')">
-      <img src="icons/school.png" alt="Education">
+      <img src="assets/icons/education.png" alt="Education">
       <span>Education</span>
     </div>
     <div class="icon" id="github-icon" onclick="window.open('https://github.com/aparkgh')">
-      <img src="icons/github.png" alt="GitHub">
+      <img src="assets/icons/github.png" alt="GitHub">
       <span>GitHub</span>
     </div>
     <div class="icon" id="linkedin-icon" onclick="window.open('https://github.com/aparkgh')">
-      <img src="icons/linkedin.png" alt="LinkedIn">
+      <img src="assets/icons/linkedin.webp" alt="LinkedIn">
       <span>LinkedIn</span>
     </div>
-    <div class="icon" id="email-icon" onclick="window.location.href='mailto:you@example.com'">
-      <img src="icons/email.png" alt="Email">
+    <div class="icon" id="email-icon" onclick="window.location.href='mailto:andrew.park6126@gmail.com'">
+      <img src="assets/icons/email.png" alt="Email">
       <span>Email</span>
     </div>
-
-    <!-- Fake icons for decoration -->
-    <div class="fake-icon fake-icon1"></div>
-    <div class="fake-icon fake-icon2"></div>
-    <div class="fake-icon fake-icon3"></div>
+    <div class="icon" id="spotify-icon" onclick="window.open('https://open.spotify.com/user/229ll5brg0pwf57snpkikhd0r')">
+      <img src="assets/icons/spotify.png" alt="Spotify">
+      <span>Spotify</span>
+    </div>
 
     <!-- Windows -->
     <div class="window" id="about-window">
@@ -57,9 +56,11 @@
       <div class="window-body">
         <p>Hello! I'm Andrew Park, a student of Advanced Computing at USYD. Welcome to my retro-style portfolio!</p>
       </div>
-      <div class="scrolling-text">
-        <div class="scrolling-track">
-          <span style="white-space: pre;">"ANDREW PARK" • SOUTH KOREA • ADVANCED COMPUTING • WEIGHTLIFTING • PHOTOGRAPHY • PIANO • SPEEDTYPING • ZEROWIRE • DAYCOUNTER • PARAEQ • FOLDERNUKER • </span>
+      <div class="scrolling-text-parent">
+        <div class="scrolling-text">
+          <div class="scrolling-track">
+            <span style="white-space: pre;">"ANDREW PARK" • SOUTH KOREA • ADVANCED COMPUTING • WEIGHTLIFTING • PHOTOGRAPHY • PIANO • SPEEDTYPING • ZEROWIRE • DAYCOUNTER • PARAEQ • FOLDERNUKER • </span>
+          </div>
         </div>
       </div>
     </div>
@@ -78,10 +79,10 @@
       </div>
     </div>
 
-    <div class="window" id="skills-window">
+    <div class="window" id="technologies-window">
       <div class="window-header">
-        Skills
-        <button onclick="closeWindow('skills-window')">X</button>
+        Technologies
+        <button onclick="closeWindow('technologies-window')">X</button>
       </div>
       <div class="window-body">
         <p>Languages: C, Python, JavaScript<br>
@@ -127,13 +128,18 @@
 
   <!-- Start Menu -->
   <div id="start-menu">
-    <div class="start-menu-header">Andrew Park</div>
+    <!-- <div class="start-menu-header">Andrew Park</div> -->
     <div class="start-menu-items">
-      <div class="start-menu-item" onclick="openWindow('about-window')">About Me</div>
-      <div class="start-menu-item" onclick="openWindow('projects-window')">Projects</div>
-      <div class="start-menu-item" onclick="openWindow('skills-window')">Skills</div>
-      <div class="start-menu-item" onclick="openWindow('experience-window')">Experience</div>
-      <div class="start-menu-item" onclick="openWindow('education-window')">Education</div>
+      <div class="start-menu-item" onclick="openWindow('projects-window')">
+        <div class="start-menu-item-projects">
+          Projects
+        </div>
+      </div>
+      <div class="start-menu-item" onclick="openWindow('contact-window')">
+        <div class="start-menu-item-contact">
+          Contact
+        </div>
+      </div>
     </div>
   </div>
 </body>

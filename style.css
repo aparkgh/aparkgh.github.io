@@ -15,6 +15,10 @@ body, html {
   overflow: hidden;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 #desktop {
   position: relative;
   width: 100%;
@@ -54,10 +58,16 @@ body, html {
 }
 
 .window {
+  /* align-items: stretch; */
+  display: flex;
+  flex-direction: column;
+  resize: both;
+  overflow: hidden;
   display: none;
   position: absolute;
   top: 100px;
   left: 100px;
+  min-height: 30px;
   min-width: 400px;
   background: #ece9d8;
   border: 1px solid #0054e3;
@@ -97,6 +107,11 @@ body, html {
 }
 
 .window-body {
+  flex: 1;
+  overflow: auto;
+  /* height: 100%; */
+  /* align-self: stretch; */
+  height: auto;
   padding: 16px;
   background: #f0f0f0;
   min-height: 100px;
@@ -198,7 +213,7 @@ body, html {
   bottom: 40px;
   left: 0;
   width: 300px;
-  height: 400px;
+  height: 98px; /* would be 148 with start menu header! */
   background: linear-gradient(to right, #2d5aa0 0%, #2d5aa0 60px, #f0f0f0 60px);
   border: 2px outset #c0c0c0;
   box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
@@ -207,9 +222,9 @@ body, html {
 }
 
 .start-menu-header {
-  height: 50px;
+  height: 0px;
   background: linear-gradient(45deg, #ff6b35, #f7931e);
-  color: white;
+  color: black;
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -222,10 +237,11 @@ body, html {
 }
 
 .start-menu-item {
-  padding: 8px 16px 8px 70px;
+  margin-left: 60px;
+  padding: 8px 16px 8px 10px;
   cursor: pointer;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   color: black;
 }
@@ -235,54 +251,65 @@ body, html {
   color: white;
 }
 
-.start-menu-item::before {
+.start-menu-item-contact {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.start-menu-item-projects {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.start-menu-item-contact::before {
   content: "";
-  width: 24px;
-  height: 24px;
-  background: #c0c0c0;
-  border: 1px inset #c0c0c0;
+  width: 20px;
+  height: 20px;
   display: inline-block;
+  background-image: url('assets/icons/telephone.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+
+.start-menu-item-projects::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-image: url('assets/icons/folder.png');
+  background-size: contain;
+  background-repeat: no-repeat;
   margin-right: 8px;
 }
 
 /* Icon positioning */
 #about-icon { top: 50px; left: 50px; }
 #projects-icon { top: 150px; left: 200px; }
-#skills-icon { top: 80px; right: 100px; }
+#technologies-icon { top: 80px; right: 100px; }
 #experience-icon { top: 200px; right: 250px; }
 #education-icon { top: 300px; left: 100px; }
 #github-icon { top: 250px; left: 400px; }
 #linkedin-icon { top: 120px; left: 350px; }
 #email-icon { top: 350px; right: 150px; }
+#spotify-icon { top: 480px; right: 100px; }
 
-/* Fake desktop icons for decoration */
-.fake-icon {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  background: #c0c0c0;
-  border: 1px solid #808080;
-  opacity: 0.3;
+.scrolling-text-parent {
+  overflow: hidden;
 }
-
-.fake-icon1 { top: 400px; left: 300px; }
-.fake-icon2 { top: 180px; right: 300px; }
-.fake-icon3 { top: 320px; right: 50px; }
 
 .scrolling-text {
   overflow: hidden;
   white-space: nowrap;
   background: #f0f0f0;
   border-top: 1px solid #ccc;
-  margin-top: 12px;
-  height: 20px;
-  line-height: 20px;
-  width: 840px;
 }
 
 .scrolling-track {
   display: inline-flex;
-  animation: scroll-left 5s linear infinite;
+  animation: scroll-left 20s linear infinite;
 }
 
 .scrolling-track span {
