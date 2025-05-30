@@ -155,12 +155,12 @@ body, html {
 #start-button {
   border: 2px outset #fff;
   color: white;
-  padding: 7px 47px 2px 0px;
+  padding: 3px 47px 2px 0px;
   margin: 0px 4px 0px 2px;
   cursor: pointer;
   font-weight: bold;
   display: flex;
-  align-items: center;
+  justify-content: center;
   gap: 6px;
 }
 
@@ -181,15 +181,14 @@ body, html {
 }
 
 #clock {
-  /* background: rgba(0,0,0,0.1); */
-  margin: 2px -1px 0px 0px;
-  padding: 5px 2px 6px 3px;
-  /* border: 1px inset #4a90e2; */
-  font-size: 12px;
-  min-width: 70px;
-  text-align: center;
   color: black;
-
+  margin: 0px -1px -1px 0px;
+	width: 75px !important;
+	height: 25px;
+	text-align: center;
+	display: flex;
+	justify-content: center;
+	align-items: center;
   border: 1px inset #fff;
 }
 
