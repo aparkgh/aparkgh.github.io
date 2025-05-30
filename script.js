@@ -3,6 +3,31 @@ function openWindow(id) {
   const win = document.getElementById(id);
   win.style.display = "flex";
   win.style.width = `${window.innerWidth / 2}px`;
+
+  // Temporarily show it to get size
+  win.style.visibility = "hidden";
+  win.style.display = "block";
+
+  const winWidth = win.offsetWidth;
+  const winHeight = win.offsetHeight;
+
+  const maxX = window.innerWidth - winWidth;
+  const maxY = window.innerHeight - winHeight - 40; // Leave room for taskbar
+
+  // Clamp current position or re-center
+  const currentLeft = parseInt(win.style.left) || 0;
+  const currentTop = parseInt(win.style.top) || 0;
+
+  const clampedX = Math.max(0, Math.min(currentLeft, maxX));
+  const clampedY = Math.max(0, Math.min(currentTop, maxY));
+
+  win.style.left = `${clampedX}px`;
+  win.style.top = `${clampedY}px`;
+
+  // Show it for real
+  win.style.visibility = "visible";
+  win.style.display = "flex";
+
   bringToFront(win);
 }
 
@@ -30,51 +55,78 @@ function makeDraggable(win) {
   let initialX = 0;
   let initialY = 0;
 
-  const onDrag = function (e) {
+  function getEventCoordinates(e) {
+    if (e.type.startsWith("touch")) {
+      const touch = e.touches[0] || e.changedTouches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    } else {
+      return { x: e.clientX, y: e.clientY };
+    }
+  }
+
+  function startDrag(e) {
     if (e.target.tagName === "BUTTON") return;
 
     isDragging = true;
     bringToFront(win);
-
-    initialX = e.clientX - win.offsetLeft;
-    initialY = e.clientY - win.offsetTop;
+    const coords = getEventCoordinates(e);
+    initialX = coords.x - win.offsetLeft;
+    initialY = coords.y - win.offsetTop;
 
     header.style.cursor = "grabbing";
-  };
-
-  header.addEventListener("mousedown", onDrag);
-  header.addEventListener("touchstart", onDrag);
-
-  document.addEventListener("mousemove", function (e) {
-    if (!isDragging) return;
-
     e.preventDefault();
-    currentX = e.clientX - initialX;
-    currentY = e.clientY - initialY;
+  }
 
-    // Keep window within bounds
-    const maxX = window.innerWidth - win.offsetWidth;
-    const maxY = window.innerHeight - win.offsetHeight - 40; // Account for taskbar
+  function duringDrag(e) {
+    if (!isDragging) return;
+    const coords = getEventCoordinates(e);
+    currentX = coords.x - initialX;
+    currentY = coords.y - initialY;
+
+    // clamps window to desktop so they stop opening outside of the viewport
+    const winWidth = win.offsetWidth || 400;
+    const winHeight = win.offsetHeight || 300;
+    const taskbarHeight = 40;
+
+    const maxX = window.innerWidth - winWidth;
+    const maxY = window.innerHeight - winHeight - taskbarHeight;
+
+    const randomX = Math.random() * Math.max(0, maxX);
+    const randomY = Math.random() * Math.max(0, maxY);
+
+    win.style.left = `${randomX}px`;
+    win.style.top = `${randomY}px`;
 
     currentX = Math.max(0, Math.min(currentX, maxX));
     currentY = Math.max(0, Math.min(currentY, maxY));
 
     win.style.left = currentX + "px";
     win.style.top = currentY + "px";
-  });
+    e.preventDefault();
+  }
 
-  document.addEventListener("mouseup", function () {
+  function endDrag() {
     if (isDragging) {
       isDragging = false;
       header.style.cursor = "move";
     }
-  });
+  }
 
-  // Bring window to front when clicked
-  win.addEventListener("mousedown", function () {
-    bringToFront(win);
-  });
+  // Mouse events
+  header.addEventListener("mousedown", startDrag);
+  document.addEventListener("mousemove", duringDrag);
+  document.addEventListener("mouseup", endDrag);
+
+  // Touch events
+  header.addEventListener("touchstart", startDrag, { passive: false });
+  document.addEventListener("touchmove", duringDrag, { passive: false });
+  document.addEventListener("touchend", endDrag);
+
+  // Bring window to front on interaction
+  win.addEventListener("mousedown", () => bringToFront(win));
+  win.addEventListener("touchstart", () => bringToFront(win));
 }
+
 
 // Initialize draggable windows
 document.addEventListener("DOMContentLoaded", function () {
