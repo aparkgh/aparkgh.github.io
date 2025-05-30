@@ -315,11 +315,14 @@ const setInitialPositions = () => {
 };
 
 // Global variables for drag state
-let draggedIcon = null;
-let isDragging = false;
-let dragStartTime = 0;
-let dragStartPos = { x: 0, y: 0 };
-let hasMoved = false;
+let currentDragState = {
+  icon: null,
+  element: null,
+  isDragging: false,
+  startTime: 0,
+  startPos: { x: 0, y: 0 },
+  hasMoved: false
+};
 
 const getIconElement = (icon) => {
   const element = document.createElement("div");
@@ -327,12 +330,12 @@ const getIconElement = (icon) => {
   element.style.position = "absolute";
   element.style.cursor = "pointer";
   element.style.userSelect = "none";
-  element.style.touchAction = "none"; // Prevent scrolling on touch
+  element.style.touchAction = "none";
 
   const image = document.createElement("img");
   image.setAttribute("alt", icon.text);
   image.setAttribute("src", icon.imageSource);
-  image.style.pointerEvents = "none"; // Prevent image from interfering with events
+  image.style.pointerEvents = "none";
   element.append(image);
 
   const text = document.createElement("span");
@@ -345,114 +348,110 @@ const getIconElement = (icon) => {
   element.style.left = `${icon.location.x}px`;
   element.style.top = `${icon.location.y}px`;
 
-  // Mouse events
-  element.addEventListener("mousedown", (e) => startDrag(e, icon, element));
+  // Unified pointer event handling
+  const startInteraction = (e) => {
+    e.preventDefault();
+    
+    // Get coordinates (works for both mouse and touch)
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    // Set up drag state
+    currentDragState.icon = icon;
+    currentDragState.element = element;
+    currentDragState.isDragging = false;
+    currentDragState.hasMoved = false;
+    currentDragState.startTime = Date.now();
+    currentDragState.startPos = { x: clientX, y: clientY };
+    
+    // Calculate offset from pointer to icon position
+    const rect = element.getBoundingClientRect();
+    icon.dragOffset.x = clientX - rect.left;
+    icon.dragOffset.y = clientY - rect.top;
+    
+    icon.isBeingDragged = true;
+    element.style.zIndex = "1000";
+  };
   
-  // Touch events for mobile - use passive: false to allow preventDefault
-  element.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // Prevent default touch behavior
-    const touch = e.touches[0];
-    startDrag(touch, icon, element);
-  }, { passive: false });
-
-  // Click handler with improved logic
-  element.addEventListener("click", (e) => {
+  const moveInteraction = (e) => {
+    if (!currentDragState.icon || currentDragState.icon !== icon) return;
+    
     e.preventDefault();
-    // Only trigger click if we haven't moved significantly or been dragging for long
-    if (!hasMoved || (Date.now() - dragStartTime < 200)) {
-      icon.onclick();
+    
+    // Get coordinates
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    // Calculate movement distance
+    const moveDistance = Math.sqrt(
+      Math.pow(clientX - currentDragState.startPos.x, 2) + 
+      Math.pow(clientY - currentDragState.startPos.y, 2)
+    );
+    
+    // Start dragging if moved more than threshold
+    if (moveDistance > 8) {
+      currentDragState.isDragging = true;
+      currentDragState.hasMoved = true;
     }
-  });
-
-  // Prevent context menu on long press
-  element.addEventListener("contextmenu", (e) => {
+    
+    if (currentDragState.isDragging) {
+      // Update icon position
+      icon.location.x = clientX - icon.dragOffset.x;
+      icon.location.y = clientY - icon.dragOffset.y;
+      
+      // Keep within bounds
+      const maxX = window.innerWidth - 80;
+      const maxY = window.innerHeight - 80;
+      
+      icon.location.x = Math.max(0, Math.min(maxX, icon.location.x));
+      icon.location.y = Math.max(0, Math.min(maxY, icon.location.y));
+      
+      // Update position immediately
+      element.style.left = `${icon.location.x}px`;
+      element.style.top = `${icon.location.y}px`;
+    }
+  };
+  
+  const endInteraction = (e) => {
+    if (!currentDragState.icon || currentDragState.icon !== icon) return;
+    
     e.preventDefault();
-  });
+    
+    const wasClick = !currentDragState.hasMoved && (Date.now() - currentDragState.startTime < 300);
+    
+    // Clean up
+    icon.isBeingDragged = false;
+    element.style.zIndex = "auto";
+    
+    // Reset drag state
+    currentDragState.icon = null;
+    currentDragState.element = null;
+    currentDragState.isDragging = false;
+    currentDragState.hasMoved = false;
+    
+    // Handle click
+    if (wasClick) {
+      setTimeout(() => {
+        icon.onclick();
+      }, 10);
+    }
+  };
+
+  // Mouse events
+  element.addEventListener("mousedown", startInteraction);
+  element.addEventListener("mousemove", moveInteraction);
+  element.addEventListener("mouseup", endInteraction);
+  
+  // Touch events
+  element.addEventListener("touchstart", startInteraction, { passive: false });
+  element.addEventListener("touchmove", moveInteraction, { passive: false });
+  element.addEventListener("touchend", endInteraction, { passive: false });
+  
+  // Prevent context menu
+  element.addEventListener("contextmenu", (e) => e.preventDefault());
 
   return element;
 };
-
-const startDrag = (e, icon, element) => {
-  draggedIcon = icon;
-  isDragging = false;
-  hasMoved = false;
-  dragStartTime = Date.now();
-  
-  // Store initial drag position for movement detection
-  dragStartPos.x = e.clientX;
-  dragStartPos.y = e.clientY;
-  
-  // Calculate offset from mouse/touch to icon position
-  const rect = element.getBoundingClientRect();
-  icon.dragOffset.x = e.clientX - rect.left;
-  icon.dragOffset.y = e.clientY - rect.top;
-  
-  icon.isBeingDragged = true;
-  element.style.zIndex = "1000"; // Bring to front while dragging
-};
-
-// Global mouse/touch move handler
-const handleMove = (e) => {
-  if (!draggedIcon || !draggedIcon.isBeingDragged) return;
-  
-  // Get client coordinates (works for both mouse and touch)
-  const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-  const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-  
-  // Check if we've moved significantly to distinguish from tap
-  const moveDistance = Math.sqrt(
-    Math.pow(clientX - dragStartPos.x, 2) + 
-    Math.pow(clientY - dragStartPos.y, 2)
-  );
-  
-  if (moveDistance > 5) { // 5px threshold
-    hasMoved = true;
-    isDragging = true;
-    e.preventDefault(); // Only prevent default when actually dragging
-  }
-  
-  if (isDragging) {
-    // Update icon position accounting for offset
-    draggedIcon.location.x = clientX - draggedIcon.dragOffset.x;
-    draggedIcon.location.y = clientY - draggedIcon.dragOffset.y;
-    
-    // Keep icon within viewport bounds
-    const maxX = window.innerWidth - 80; // Assuming icon width ~80px
-    const maxY = window.innerHeight - 80; // Assuming icon height ~80px
-    
-    draggedIcon.location.x = Math.max(0, Math.min(maxX, draggedIcon.location.x));
-    draggedIcon.location.y = Math.max(0, Math.min(maxY, draggedIcon.location.y));
-    
-    renderAllIcons();
-  }
-};
-
-// Global mouse/touch end handler
-const handleEnd = (e) => {
-  if (draggedIcon) {
-    draggedIcon.isBeingDragged = false;
-    
-    // Find and reset z-index
-    const element = document.querySelector(`.icon:nth-child(${icons.indexOf(draggedIcon) + 1})`);
-    if (element) {
-      element.style.zIndex = "auto";
-    }
-    
-    draggedIcon = null;
-    
-    // Reset dragging state with a shorter delay
-    setTimeout(() => {
-      isDragging = false;
-      hasMoved = false;
-    }, 50);
-  }
-};
-
-// Add global event listeners with proper options for mobile
-document.addEventListener("mousemove", handleMove);
-document.addEventListener("mouseup", handleEnd);
-document.addEventListener("touchmove", handleMove, { passive: false });
-document.addEventListener("touchend", handleEnd, { passive: false });
 
 const renderAllIcons = () => {
   const desktop = document.getElementById("desktop-icons");
