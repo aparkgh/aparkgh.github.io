@@ -202,20 +202,32 @@ window.addEventListener("resize", function () {
 });
 
 // Click easter egg (if you found this by scraping my script.js then it doesn't count)
-let clickCount = 0;
 document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("desktop").addEventListener("dblclick", function (e) {
-    if (e.target === this) {
-      clickCount++;
-      if (clickCount === 3) {
-        alert(
-          "🎉 ...Oh? You found the secret desktop message!\n\nThanks for exploring my portfolio!",
-        );
-        clickCount = 0;
-      }
+  const konamiCode = [
+    "ArrowUp", "ArrowUp",
+    "ArrowDown", "ArrowDown",
+    "ArrowLeft", "ArrowRight",
+    "ArrowLeft", "ArrowRight",
+    "b", "a"
+  ];
+
+  let userInput = [];
+
+  document.addEventListener("keydown", function (e) {
+    userInput.push(e.key);
+    if (userInput.length > konamiCode.length) {
+      userInput.shift(); // keep only the last N keys
+    }
+
+    if (userInput.join("") === konamiCode.join("")) {
+      alert(
+        "🎉 ...Oh? You found the secret desktop message!\n\nThanks for exploring my portfolio!"
+      );
+      userInput = [];
     }
   });
 });
+
 
 // Keyboard shortcuts
 document.addEventListener("keydown", function (e) {
