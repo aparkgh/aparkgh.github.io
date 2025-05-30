@@ -5,7 +5,7 @@
 
 body, html {
   font-family: 'FreePixel'; 
-  background: url('assets/bliss__1080p__by_ollywindows007_dh2lfsa-fullview.jpg') no-repeat center center fixed;
+  background: url('assets/bliss.jpg') no-repeat center center fixed;
   background-size: cover;   /* Zoom to cover entire area, keeping aspect ratio */
   background-position: center center;  /* Center the image */
   background-repeat: no-repeat;         /* No tiling */
