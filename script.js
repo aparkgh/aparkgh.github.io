@@ -32,3 +32,15 @@ function makeDraggable(win) {
 }
 
 document.querySelectorAll('.window').forEach(win => makeDraggable(win));
+
+
+function toggleStartMenu() {
+  const menu = document.getElementById('start-menu');
+  menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+document.addEventListener('click', function(event) {
+  if (!event.target.closest('#start-button') && !event.target.closest('#start-menu')) {
+    document.getElementById('start-menu').style.display = 'none';
+  }
+});

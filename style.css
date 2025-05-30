@@ -3,7 +3,7 @@ body, html {
   padding: 0;
   height: 100%;
   font-family: Tahoma, sans-serif;
-  background: url('bliss.jpg') no-repeat center center fixed;
+  background: url('assets/bliss.jpg') no-repeat center center fixed;
   background-size: cover;
 }
 
@@ -20,6 +20,11 @@ body, html {
   margin: 10px;
   float: left;
   cursor: pointer;
+}
+
+.icon img {
+  width: 48px;
+  height: 48px;
 }
 
 .window {
@@ -42,6 +47,10 @@ body, html {
   cursor: move;
 }
 
+.window-body {
+  padding: 10px;
+}
+
 #taskbar {
   position: fixed;
   bottom: 0;
@@ -62,4 +71,34 @@ body, html {
   margin: 0 10px;
   cursor: pointer;
   border: 2px outset #fff;
+}
+
+
+#start-menu {
+  display: none;
+  position: fixed;
+  bottom: 40px;
+  left: 10px;
+  width: 200px;
+  background: #c0c0c0;
+  border: 2px solid #000080;
+  box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
+  font-size: 14px;
+}
+
+#start-menu ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#start-menu li {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #808080;
+}
+
+#start-menu li:hover {
+  background-color: #000080;
+  color: white;
 }

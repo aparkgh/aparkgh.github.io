@@ -1,29 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XP Portfolio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
   <div id="desktop">
     <div class="icon" onclick="openWindow('about')">
-      <img src="about-icon.png" alt="About Me">
+      <img src="assets/about-icon.png" alt="About Me">
       <span>About Me</span>
     </div>
     <div class="icon" onclick="openWindow('project1')">
-      <img src="project-icon.png" alt="Project">
-      <span>My Project</span>
+      <img src="assets/project-icon.png" alt="Project">
+      <span>Project 1</span>
     </div>
 
-    <!-- Windows -->
     <div id="about" class="window">
       <div class="window-header">
         <span>About Me</span>
         <button onclick="closeWindow('about')">X</button>
       </div>
       <div class="window-body">
-        <p>Hello! I'm Andrew Park...</p>
+        <p>Hello! I'm Andrew Park, a developer and student at USYD.</p>
       </div>
     </div>
 
-    <!-- Taskbar -->
+    <div id="project1" class="window">
+      <div class="window-header">
+        <span>Project 1</span>
+        <button onclick="closeWindow('project1')">X</button>
+      </div>
+      <div class="window-body">
+        <p>This is a project description.</p>
+      </div>
+    </div>
+
     <div id="taskbar">
-      <div id="start-button">Start</div>
+      <div id="start-button" onclick="toggleStartMenu()">Start</div>
       <div id="taskbar-items"></div>
     </div>
+
+    <div id="start-menu">
+      <ul>
+        <li onclick="openWindow('about')">About Me</li>
+        <li onclick="openWindow('project1')">Project 1</li>
+      </ul>
+    </div>
   </div>
+  <script src="script.js"></script>
 </body>
+</html>
