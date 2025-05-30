@@ -1,146 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <script src="script.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Retro Portfolio Desktop</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="desktop">
-    <!-- Icons -->
-    <div class="icon" id="about-icon" onclick="openWindow('about-window')">
-      <img src="assets/icons/about.png" alt="About">
-      <span>About Me</span>
-    </div>
-    <div class="icon" id="projects-icon" onclick="openWindow('projects-window')">
-      <img src="assets/icons/projects.png" alt="Projects">
-      <span>Projects</span>
-    </div>
-    <div class="icon" id="technologies-icon" onclick="openWindow('technologies-window')">
-      <img src="assets/icons/technologies.png" alt="Technologies">
-      <span>Technologies</span>
-    </div>
-    <div class="icon" id="experience-icon" onclick="openWindow('experience-window')">
-      <img src="assets/icons/experience.png" alt="Experience">
-      <span>Experience</span>
-    </div>
-    <div class="icon" id="education-icon" onclick="openWindow('education-window')">
-      <img src="assets/icons/education.png" alt="Education">
-      <span>Education</span>
-    </div>
-    <div class="icon" id="github-icon" onclick="window.open('https://github.com/aparkgh')">
-      <img src="assets/icons/github.png" alt="GitHub">
-      <span>GitHub</span>
-    </div>
-    <div class="icon" id="linkedin-icon" onclick="window.open('https://github.com/aparkgh')">
-      <img src="assets/icons/linkedin.webp" alt="LinkedIn">
-      <span>LinkedIn</span>
-    </div>
-    <div class="icon" id="email-icon" onclick="window.location.href='mailto:andrew.park6126@gmail.com'">
-      <img src="assets/icons/email.png" alt="Email">
-      <span>Email</span>
-    </div>
-    <div class="icon" id="spotify-icon" onclick="window.open('https://open.spotify.com/user/229ll5brg0pwf57snpkikhd0r')">
-      <img src="assets/icons/spotify.png" alt="Spotify">
-      <span>Spotify</span>
-    </div>
+    <head>
+        <script src="script.js"></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Retro Portfolio Desktop</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div id="grain"></div>
+        <div id="desktop">
+            <!-- Windows -->
+            <div id="desktop-icons">
+                <div class="window" id="about-window">
+                    <div class="window-header">
+                        About Me
+                        <button onclick="closeWindow('about-window')">X</button>
+                    </div>
+                    <div class="window-body">
+                        <p>
+                            Hello! I'm Andrew Park, a student of Advanced
+                            Computing at USYD. Welcome to my retro-style
+                            portfolio!
+                        </p>
+                    </div>
+                    <div class="scrolling-text-parent">
+                        <div class="scrolling-text">
+                            <div class="scrolling-track">
+                                <span>
+                                    "ANDREW PARK" • SOUTH KOREA • ADVANCED
+                                    COMPUTING • WEIGHTLIFTING • PHOTOGRAPHY •
+                                    PIANO • SPEEDTYPING • ZEROWIRE • DAYCOUNTER
+                                    • PARAEQ • FOLDERNUKER •&nbsp;
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Windows -->
-    <div class="window" id="about-window">
-      <div class="window-header">
-        About Me
-        <button onclick="closeWindow('about-window')">X</button>
-      </div>
-      <div class="window-body">
-        <p>Hello! I'm Andrew Park, a student of Advanced Computing at USYD. Welcome to my retro-style portfolio!</p>
-      </div>
-      <div class="scrolling-text-parent">
-        <div class="scrolling-text">
-          <div class="scrolling-track">
-            <span style="white-space: pre;">"ANDREW PARK" • SOUTH KOREA • ADVANCED COMPUTING • WEIGHTLIFTING • PHOTOGRAPHY • PIANO • SPEEDTYPING • ZEROWIRE • DAYCOUNTER • PARAEQ • FOLDERNUKER • </span>
-          </div>
+            <div class="window" id="projects-window">
+                <div class="window-header">
+                    Projects
+                    <button onclick="closeWindow('projects-window')">X</button>
+                </div>
+                <div class="window-body">
+                    <ul>
+                        <li>Custom USB HID Mouse</li>
+                        <li>Collaborative Markdown Editor in C</li>
+                        <li>Parametric Equalizer in Python</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="window" id="technologies-window">
+                <div class="window-header">
+                    Technologies
+                    <button onclick="closeWindow('technologies-window')">
+                        X
+                    </button>
+                </div>
+                <div class="window-body">
+                    <p>
+                        Languages: C, Python, JavaScript<br />
+                        Tools: Git, VSCode, Linux, Raspberry Pi<br />
+                        Concepts: Data Structures, Systems Programming
+                    </p>
+                </div>
+            </div>
+
+            <div class="window" id="experience-window">
+                <div class="window-header">
+                    Experience
+                    <button onclick="closeWindow('experience-window')">
+                        X
+                    </button>
+                </div>
+                <div class="window-body">
+                    <p>
+                        Subcommittee Member - Photography Society<br />
+                        Hackathons - UNSW DevSoc<br />
+                        Freelance Projects & Coursework
+                    </p>
+                </div>
+            </div>
+
+            <div class="window" id="education-window">
+                <div class="window-header">
+                    Education
+                    <button onclick="closeWindow('education-window')">X</button>
+                </div>
+                <div class="window-body">
+                    <p>
+                        Bachelor of Advanced Computing<br />
+                        Majors: Computer Science, Mathematics<br />
+                        University of Sydney
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div class="window" id="projects-window">
-      <div class="window-header">
-        Projects
-        <button onclick="closeWindow('projects-window')">X</button>
-      </div>
-      <div class="window-body">
-        <ul>
-          <li>Custom USB HID Mouse</li>
-          <li>Collaborative Markdown Editor in C</li>
-          <li>Parametric Equalizer in Python</li>
-        </ul>
-      </div>
-    </div>
+        <!-- Taskbar -->
+        <div id="taskbar">
+            <div id="start-button" onclick="toggleStartMenu()">
+                <img src="assets/icons/windows.png" alt="" />
+                Start
+            </div>
+            <div id="taskbar-right">
+                <div id="clock"></div>
+            </div>
+        </div>
 
-    <div class="window" id="technologies-window">
-      <div class="window-header">
-        Technologies
-        <button onclick="closeWindow('technologies-window')">X</button>
-      </div>
-      <div class="window-body">
-        <p>Languages: C, Python, JavaScript<br>
-        Tools: Git, VSCode, Linux, Raspberry Pi<br>
-        Concepts: Data Structures, Systems Programming</p>
-      </div>
-    </div>
+        <!-- Start Menu -->
+        <div id="start-menu">
+            <div id="left-bar">
+                <div id="left-bar-text-container">Park 95</div>
+            </div>
+            <div id="start-menu-items">
+                <div class="start-menu-item" onclick="openWindow('projects-window')">
+                    <img src="assets/icons/folder.png" alt="" />
+                    <div class="start-menu-item-text">Projects</div>
+                </div>
+                <div class="start-menu-item start-menu-item-contact" onclick="openWindow('contact-window')">
+                    <img src="assets/icons/telephone.png" alt="" />
+                    Contact
+                </div>
+            </div>
+        </div>
 
-    <div class="window" id="experience-window">
-      <div class="window-header">
-        Experience
-        <button onclick="closeWindow('experience-window')">X</button>
-      </div>
-      <div class="window-body">
-        <p>Subcommittee Member - Photography Society<br>
-        Hackathons - UNSW DevSoc<br>
-        Freelance Projects & Coursework</p>
-      </div>
-    </div>
-
-    <div class="window" id="education-window">
-      <div class="window-header">
-        Education
-        <button onclick="closeWindow('education-window')">X</button>
-      </div>
-      <div class="window-body">
-        <p>Bachelor of Advanced Computing<br>
-        Majors: Computer Science, Mathematics<br>
-        University of Sydney</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Taskbar -->
-  <div id="taskbar">
-    <div class="taskbar-left">
-      <div id="start-button" onclick="toggleStartMenu()">Start</div>
-    </div>
-    <div class="taskbar-right">
-      <div id="clock"></div>
-    </div>
-  </div>
-
-  <!-- Start Menu -->
-  <div id="start-menu">
-    <div id="left-bar">
-      <div id="left-bar-text">
-        Park 95
-      </div>
-    </div>
-    <div id="start-menu-items">
-      <div class="start-menu-item start-menu-item-projects" onclick="openWindow('projects-window')">
-        Projects
-      </div>
-      <div class="start-menu-item start-menu-item-contact" onclick="openWindow('contact-window')">
-        Contact
-      </div>
-    </div>
-  </div>
-</body>
+    </body>
 </html>
