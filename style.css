@@ -184,6 +184,7 @@ body, html {
 }
 
 #start-button::before {
+  margin-left: 3px;
   content: "⊞";
   font-size: 16px;
   font-weight: bold;
@@ -214,11 +215,27 @@ body, html {
   left: 0;
   width: 300px;
   height: 98px; /* would be 148 with start menu header! */
-  background: linear-gradient(to right, #2d5aa0 0%, #2d5aa0 60px, #f0f0f0 60px);
+  /* background: linear-gradient(to right, #2d5aa0 0%, #2d5aa0 60px, #f0f0f0 60px); */
+  background: #fafafa;
   border: 2px outset #c0c0c0;
   box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
-  font-size: 12px;
+  font-size: 0.75rem;
   z-index: 2001;
+}
+
+#left-bar {
+    background: #00f;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+#left-bar-text {
+  font-size: 1rem;
+  color: white;
+  transform: rotate(270deg) translate(-50%, -50%);
+  left: 50%;
+  position: absolute;
 }
 
 .start-menu-header {
@@ -229,38 +246,21 @@ body, html {
   align-items: center;
   padding: 0 16px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
-.start-menu-items {
-  padding: 8px 0;
+#start-menu-items {
+  
 }
 
 .start-menu-item {
-  margin-left: 60px;
-  padding: 8px 16px 8px 10px;
   cursor: pointer;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
   color: black;
 }
 
 .start-menu-item:hover {
   background: #316ac5;
   color: white;
-}
-
-.start-menu-item-contact {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 2px;
-}
-
-.start-menu-item-projects {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 2px;
 }
 
 .start-menu-item-contact::before {

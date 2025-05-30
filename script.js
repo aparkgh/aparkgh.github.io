@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Start menu functionality
 function toggleStartMenu() {
   const menu = document.getElementById('start-menu');
-  menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+  menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
 }
 
 // Close start menu when clicking elsewhere
