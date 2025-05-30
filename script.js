@@ -281,7 +281,7 @@ const icons = [
       window.open("https://open.spotify.com/user/229ll5brg0pwf57snpkikhd0r"),
     "assets/icons/spotify.png",
     { x: 0, y: 0 },
-    { top: 450, right: 320 } // Added desktop position for Spotify
+    { top: 450, right: 320 }
   ),
 ];
 
@@ -317,6 +317,9 @@ const setInitialPositions = () => {
 // Global variables for drag state
 let draggedIcon = null;
 let isDragging = false;
+let dragStartTime = 0;
+let dragStartPos = { x: 0, y: 0 };
+let hasMoved = false;
 
 const getIconElement = (icon) => {
   const element = document.createElement("div");
@@ -345,18 +348,25 @@ const getIconElement = (icon) => {
   // Mouse events
   element.addEventListener("mousedown", (e) => startDrag(e, icon, element));
   
-  // Touch events for mobile
+  // Touch events for mobile - use passive: false to allow preventDefault
   element.addEventListener("touchstart", (e) => {
     e.preventDefault(); // Prevent default touch behavior
     const touch = e.touches[0];
     startDrag(touch, icon, element);
-  });
+  }, { passive: false });
 
-  // Click handler (only if not dragged)
+  // Click handler with improved logic
   element.addEventListener("click", (e) => {
-    if (!isDragging) {
+    e.preventDefault();
+    // Only trigger click if we haven't moved significantly or been dragging for long
+    if (!hasMoved || (Date.now() - dragStartTime < 200)) {
       icon.onclick();
     }
+  });
+
+  // Prevent context menu on long press
+  element.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
   });
 
   return element;
@@ -364,7 +374,13 @@ const getIconElement = (icon) => {
 
 const startDrag = (e, icon, element) => {
   draggedIcon = icon;
-  isDragging = false; // Reset at start
+  isDragging = false;
+  hasMoved = false;
+  dragStartTime = Date.now();
+  
+  // Store initial drag position for movement detection
+  dragStartPos.x = e.clientX;
+  dragStartPos.y = e.clientY;
   
   // Calculate offset from mouse/touch to icon position
   const rect = element.getBoundingClientRect();
@@ -379,25 +395,36 @@ const startDrag = (e, icon, element) => {
 const handleMove = (e) => {
   if (!draggedIcon || !draggedIcon.isBeingDragged) return;
   
-  e.preventDefault();
-  isDragging = true; // Mark as dragging to prevent click
-  
   // Get client coordinates (works for both mouse and touch)
   const clientX = e.clientX || (e.touches && e.touches[0].clientX);
   const clientY = e.clientY || (e.touches && e.touches[0].clientY);
   
-  // Update icon position accounting for offset
-  draggedIcon.location.x = clientX - draggedIcon.dragOffset.x;
-  draggedIcon.location.y = clientY - draggedIcon.dragOffset.y;
+  // Check if we've moved significantly to distinguish from tap
+  const moveDistance = Math.sqrt(
+    Math.pow(clientX - dragStartPos.x, 2) + 
+    Math.pow(clientY - dragStartPos.y, 2)
+  );
   
-  // Keep icon within viewport bounds
-  const maxX = window.innerWidth - 80; // Assuming icon width ~80px
-  const maxY = window.innerHeight - 80; // Assuming icon height ~80px
+  if (moveDistance > 5) { // 5px threshold
+    hasMoved = true;
+    isDragging = true;
+    e.preventDefault(); // Only prevent default when actually dragging
+  }
   
-  draggedIcon.location.x = Math.max(0, Math.min(maxX, draggedIcon.location.x));
-  draggedIcon.location.y = Math.max(0, Math.min(maxY, draggedIcon.location.y));
-  
-  renderAllIcons();
+  if (isDragging) {
+    // Update icon position accounting for offset
+    draggedIcon.location.x = clientX - draggedIcon.dragOffset.x;
+    draggedIcon.location.y = clientY - draggedIcon.dragOffset.y;
+    
+    // Keep icon within viewport bounds
+    const maxX = window.innerWidth - 80; // Assuming icon width ~80px
+    const maxY = window.innerHeight - 80; // Assuming icon height ~80px
+    
+    draggedIcon.location.x = Math.max(0, Math.min(maxX, draggedIcon.location.x));
+    draggedIcon.location.y = Math.max(0, Math.min(maxY, draggedIcon.location.y));
+    
+    renderAllIcons();
+  }
 };
 
 // Global mouse/touch end handler
@@ -413,18 +440,19 @@ const handleEnd = (e) => {
     
     draggedIcon = null;
     
-    // Reset isDragging after a short delay to prevent click from firing
+    // Reset dragging state with a shorter delay
     setTimeout(() => {
       isDragging = false;
-    }, 100);
+      hasMoved = false;
+    }, 50);
   }
 };
 
-// Add global event listeners
+// Add global event listeners with proper options for mobile
 document.addEventListener("mousemove", handleMove);
 document.addEventListener("mouseup", handleEnd);
 document.addEventListener("touchmove", handleMove, { passive: false });
-document.addEventListener("touchend", handleEnd);
+document.addEventListener("touchend", handleEnd, { passive: false });
 
 const renderAllIcons = () => {
   const desktop = document.getElementById("desktop-icons");
@@ -456,12 +484,23 @@ document.addEventListener("DOMContentLoaded", function () {
   updateClock(); // Run once immediately
   setInterval(updateClock, 1000); // Then every second
   const track = document.querySelector(".scrolling-track");
-  track.innerHTML += track.innerHTML;
+  if (track) {
+    track.innerHTML += track.innerHTML;
+  }
 
   const desktop = document.getElementById("desktop");
 
   renderAllIcons();
 });
+
+
+
+
+
+
+
+
+
 
 // Selection rectangle variables
 let isSelecting = false;
