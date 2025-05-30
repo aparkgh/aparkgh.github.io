@@ -1,0 +1,65 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Tahoma, sans-serif;
+  background: url('bliss.jpg') no-repeat center center fixed;
+  background-size: cover;
+}
+
+#desktop {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.icon {
+  width: 80px;
+  text-align: center;
+  color: white;
+  margin: 10px;
+  float: left;
+  cursor: pointer;
+}
+
+.window {
+  display: none;
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 400px;
+  background: white;
+  border: 2px solid #000080;
+  box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
+}
+
+.window-header {
+  background: #000080;
+  color: white;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  cursor: move;
+}
+
+#taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 40px;
+  width: 100%;
+  background: #000080;
+  display: flex;
+  align-items: center;
+  color: white;
+  font-size: 14px;
+}
+
+#start-button {
+  background: #c0c0c0;
+  color: black;
+  padding: 5px 10px;
+  margin: 0 10px;
+  cursor: pointer;
+  border: 2px outset #fff;
+}
