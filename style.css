@@ -4,17 +4,14 @@
 }
 
 body, html {
-  font-family: 'FreePixel';
-  line-height: 1;
-  letter-spacing: 0;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeSpeed;
-  image-rendering: pixelated;
+  font-family: 'FreePixel'; 
+  background: url('assets/bliss__1080p__by_ollywindows007_dh2lfsa-fullview.jpg') no-repeat center center fixed;
+  background-size: cover;   /* Zoom to cover entire area, keeping aspect ratio */
+  background-position: center center;  /* Center the image */
+  background-repeat: no-repeat;         /* No tiling */
   margin: 0;
   padding: 0;
   height: 100%;
-  background: linear-gradient(45deg, #5c85d6, #87ceeb);
   overflow: hidden;
 }
 
@@ -81,14 +78,15 @@ body, html {
 }
 
 .window-header button {
-  background: #c0c0c0;
-  border: 1px outset #c0c0c0;
+  font-family: FreePixel;
+  background: #EAE9E7;
+  border: 2px outset #c0c0c0;
   color: black;
   width: 20px;
   height: 18px;
   cursor: pointer;
   font-size: 12px;
-  font-weight: bold;
+  /* font-weight: bold; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,7 +155,7 @@ body, html {
 #start-button {
   border: 2px outset #fff;
   color: white;
-  padding: 4px 18px 0px 0px;
+  padding: 7px 47px 2px 0px;
   margin: 0px 4px 0px 2px;
   cursor: pointer;
   font-weight: bold;
@@ -185,7 +183,7 @@ body, html {
 #clock {
   /* background: rgba(0,0,0,0.1); */
   margin: 2px -1px 0px 0px;
-  padding: 6px 2px 7px 3px;
+  padding: 5px 2px 6px 3px;
   /* border: 1px inset #4a90e2; */
   font-size: 12px;
   min-width: 70px;
@@ -271,3 +269,33 @@ body, html {
 .fake-icon1 { top: 400px; left: 300px; }
 .fake-icon2 { top: 180px; right: 300px; }
 .fake-icon3 { top: 320px; right: 50px; }
+
+.scrolling-text {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  background: #f0f0f0;
+  border-top: 1px solid #ccc;
+  margin-top: 12px;
+  height: 20px;
+  line-height: 20px;
+}
+
+.scrolling-text span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll-left 12s linear infinite;
+  color: #333;
+  font-size: 12px;
+  font-family: 'FreePixel', Tahoma, sans-serif;
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
