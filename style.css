@@ -3,6 +3,7 @@
   --font-size-lg: 1.5rem;
   --font-family-primary: 'Free Pixel', sans-serif;
   --font-family-secondary: 'Franklin Gothic';
+  --font-family-tertiary: 'Helvetica Neue Thin'
 }
 
 @font-face {
@@ -13,6 +14,11 @@
 @font-face {
     font-family: "Franklin Gothic";
     src: url("./assets/FranklinGothic.ttf") format('woff');
+}
+
+@font-face {
+    font-family: "Helvetica Neue Thin";
+    src: url("./assets/HelveticaNeue-Thin.otf") format('opentype');
 }
 
 body,
@@ -217,25 +223,8 @@ html {
     border: 1px inset #fff;
 }
 
-#start-menu {
-    display: none;
-    position: fixed;
-    bottom: 50px;
-    left: 0;
-    width: 300px;
-    min-height: 200px;
-    background: #fafafa;
-    border: 2px outset #c0c0c0;
-    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
-    font-size: 0.75rem;
-    z-index: 2001;
-
-    display: flex; /* Make it flex so left-bar + items align side-by-side */
-    flex-direction: row;
-}
-
 #left-bar {
-    background: #00f;
+    background: #84878C;
     width: 30px;
     display: flex;
     align-items: center;
@@ -248,7 +237,7 @@ html {
     transform: rotate(180deg); /* Text bottom to top */
     color: #ccc;
     font-family: var(--font-family-secondary);
-    font-size: 1rem;
+    font-size: 1.5rem;
     text-align: center;
     height: 100%;
     display: flex;
@@ -256,15 +245,36 @@ html {
     justify-content: center;
 }
 
-
 #left-bar-text {
     position: absolute;
     transform: rotate(270deg);
     font-family: var(--font-family-secondary);
-    color: #ccc;
-    font-size: 1rem;
+    color: #C0C0C0;
+    /* font-size: 10rem; */
     display: inline;
     width: 100px;
+}
+
+.logo-secondary-font {
+    color: white;
+    font-family: var(--font-family-tertiary);
+}
+
+#start-menu {
+    display: none;
+    position: fixed;
+    bottom: 45px;
+    top: 780px; /* THIS IS HARD CODED!!!!!! */
+    left: 0;
+    width: 300px;
+    /* min-height: 200px; */
+    background: #fafafa;
+    border: 2px outset #c0c0c0;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+    font-size: 0.75rem;
+    z-index: 2001;
+    flex-direction: row;
+    user-select: none;
 }
 
 .start-menu-header {
