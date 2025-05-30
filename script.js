@@ -263,7 +263,7 @@ const icons = [
   ),
   new Icon(
     "LinkedIn",
-    () => window.open("https://www.linkedin.com/in/your-profile"),
+    () => window.open("https://www.linkedin.com/in/andrewpark-/"),
     "assets/icons/linkedin.webp",
     { x: 0, y: 0 },
     { top: 120, left: 350 }
