@@ -2,53 +2,139 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XP Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Retro Portfolio Desktop</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="desktop">
-    <div class="icon" onclick="openWindow('about')">
-      <img src="assets/about-icon.png" alt="About Me">
+    <!-- Icons -->
+    <div class="icon" id="about-icon" onclick="openWindow('about-window')">
+      <img src="icons/user.png" alt="About">
       <span>About Me</span>
     </div>
-    <div class="icon" onclick="openWindow('project1')">
-      <img src="assets/project-icon.png" alt="Project">
-      <span>Project 1</span>
+    <div class="icon" id="projects-icon" onclick="openWindow('projects-window')">
+      <img src="icons/folder.png" alt="Projects">
+      <span>Projects</span>
+    </div>
+    <div class="icon" id="skills-icon" onclick="openWindow('skills-window')">
+      <img src="icons/skills.png" alt="Skills">
+      <span>Skills</span>
+    </div>
+    <div class="icon" id="experience-icon" onclick="openWindow('experience-window')">
+      <img src="icons/briefcase.png" alt="Experience">
+      <span>Experience</span>
+    </div>
+    <div class="icon" id="education-icon" onclick="openWindow('education-window')">
+      <img src="icons/school.png" alt="Education">
+      <span>Education</span>
+    </div>
+    <div class="icon" id="github-icon" onclick="window.open('https://github.com/aparkgh')">
+      <img src="icons/github.png" alt="GitHub">
+      <span>GitHub</span>
+    </div>
+    <div class="icon" id="linkedin-icon" onclick="window.open('https://github.com/aparkgh')">
+      <img src="icons/linkedin.png" alt="LinkedIn">
+      <span>LinkedIn</span>
+    </div>
+    <div class="icon" id="email-icon" onclick="window.location.href='mailto:you@example.com'">
+      <img src="icons/email.png" alt="Email">
+      <span>Email</span>
     </div>
 
-    <div id="about" class="window">
+    <!-- Fake icons for decoration -->
+    <div class="fake-icon fake-icon1"></div>
+    <div class="fake-icon fake-icon2"></div>
+    <div class="fake-icon fake-icon3"></div>
+
+    <!-- Windows -->
+    <div class="window" id="about-window">
       <div class="window-header">
-        <span>About Me</span>
-        <button onclick="closeWindow('about')">X</button>
+        About Me
+        <button onclick="closeWindow('about-window')">X</button>
       </div>
       <div class="window-body">
-        <p>Hello! I'm Andrew Park, a developer and student at USYD.</p>
+        <p>Hello! I'm Andrew Park, a student of Advanced Computing and Mathematics at USYD. Welcome to my retro-style portfolio!</p>
       </div>
     </div>
 
-    <div id="project1" class="window">
+    <div class="window" id="projects-window">
       <div class="window-header">
-        <span>Project 1</span>
-        <button onclick="closeWindow('project1')">X</button>
+        Projects
+        <button onclick="closeWindow('projects-window')">X</button>
       </div>
       <div class="window-body">
-        <p>This is a project description.</p>
+        <ul>
+          <li>Custom USB HID Mouse</li>
+          <li>Collaborative Markdown Editor in C</li>
+          <li>Parametric Equalizer in Python</li>
+        </ul>
       </div>
     </div>
 
-    <div id="taskbar">
-      <div id="start-button" onclick="toggleStartMenu()">Start</div>
-      <div id="taskbar-items"></div>
+    <div class="window" id="skills-window">
+      <div class="window-header">
+        Skills
+        <button onclick="closeWindow('skills-window')">X</button>
+      </div>
+      <div class="window-body">
+        <p>Languages: C, Python, JavaScript<br>
+        Tools: Git, VSCode, Linux, Raspberry Pi<br>
+        Concepts: Data Structures, Systems Programming</p>
+      </div>
     </div>
 
-    <div id="start-menu">
-      <ul>
-        <li onclick="openWindow('about')">About Me</li>
-        <li onclick="openWindow('project1')">Project 1</li>
-      </ul>
+    <div class="window" id="experience-window">
+      <div class="window-header">
+        Experience
+        <button onclick="closeWindow('experience-window')">X</button>
+      </div>
+      <div class="window-body">
+        <p>Subcommittee Member - Photography Society<br>
+        Hackathons - UNSW DevSoc<br>
+        Freelance Projects & Coursework</p>
+      </div>
+    </div>
+
+    <div class="window" id="education-window">
+      <div class="window-header">
+        Education
+        <button onclick="closeWindow('education-window')">X</button>
+      </div>
+      <div class="window-body">
+        <p>Bachelor of Advanced Computing<br>
+        Majors: Computer Science, Mathematics<br>
+        University of Sydney</p>
+      </div>
     </div>
   </div>
+
+  <!-- Taskbar -->
+  <div id="taskbar">
+    <div class="taskbar-left">
+      <div id="start-button" onclick="toggleStartMenu()">Start</div>
+    </div>
+    <div class="taskbar-right">
+      <div id="clock"></div>
+    </div>
+  </div>
+
+  <!-- Start Menu -->
+  <div id="start-menu">
+    <div class="start-menu-header">Andrew Park</div>
+    <div class="start-menu-items">
+      <div class="start-menu-item" onclick="openWindow('about-window')">About Me</div>
+      <div class="start-menu-item" onclick="openWindow('projects-window')">Projects</div>
+      <div class="start-menu-item" onclick="openWindow('skills-window')">Skills</div>
+      <div class="start-menu-item" onclick="openWindow('experience-window')">Experience</div>
+      <div class="start-menu-item" onclick="openWindow('education-window')">Education</div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
+  <script>
+    updateClock();
+    setInterval(updateClock, 60000); // update every minute
+  </script>
 </body>
 </html>
