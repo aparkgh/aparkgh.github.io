@@ -560,106 +560,134 @@ let selectionRect = null;
 
 // Create selection rectangle element
 const createSelectionRect = () => {
-  const rect = document.createElement('div');
-  rect.id = 'selection-rectangle';
-  rect.style.position = 'fixed';
-  rect.style.border = '1px solid #0078d4';
-  rect.style.backgroundColor = 'rgba(0, 120, 212, 0.1)';
-  rect.style.pointerEvents = 'none';
-  rect.style.zIndex = '999';
-  rect.style.display = 'none';
-  document.body.appendChild(rect);
-  return rect;
+    const rect = document.createElement('div');
+    rect.id = 'selection-rectangle';
+    rect.style.position = 'fixed';
+    rect.style.border = '1px solid #0078d4';
+    rect.style.backgroundColor = 'rgba(0, 120, 212, 0.1)';
+    rect.style.pointerEvents = 'none';
+    rect.style.zIndex = '999';
+    rect.style.display = 'none';
+    document.body.appendChild(rect);
+    return rect;
 };
 
 // Initialize selection rectangle
 selectionRect = createSelectionRect();
 
-// Start selection on desktop mousedown (but not on icons)
+// Helper function to check if target should prevent selection
+const shouldPreventSelection = (target) => {
+    const isIcon = target.closest('.icon');
+    const isInteractive = target.closest('.start-menu, button, input, select, textarea, a');
+    const isTaskbar = target.closest('#taskbar, .taskbar');
+    
+    // Add window detection - adjust these selectors to match your window structure
+    const isWindow = target.closest('.window, .window-container, [class*="window"], [id*="window"]');
+    const isWindowTitlebar = target.closest('.titlebar, .window-header, .window-title, [class*="titlebar"], [class*="header"]');
+    const isWindowContent = target.closest('.window-content, .window-body, [class*="content"]');
+    const isWindowBorder = target.closest('.window-border, .resize-handle, [class*="resize"], [class*="border"]');
+    
+    return isIcon || isInteractive || isTaskbar || isWindow || isWindowTitlebar || isWindowContent || isWindowBorder;
+};
+
+// Start selection on desktop mousedown (but not on icons or windows)
 const handleDesktopMouseDown = (e) => {
-  // Check if we're NOT clicking on an icon or other interactive element
-  const isIcon = e.target.closest('.icon');
-  const isInteractive = e.target.closest('.start-menu, button, input, select, textarea, a');
-  const isTaskbar = e.target.closest('#taskbar, .taskbar');
-  
-  if (!isIcon && !isInteractive && !isTaskbar) {
-    isSelecting = true;
-    selectionStart.x = e.clientX;
-    selectionStart.y = e.clientY;
+    if (!shouldPreventSelection(e.target)) {
+        isSelecting = true;
+        selectionStart.x = e.clientX;
+        selectionStart.y = e.clientY;
+        
+        // Show the selection rectangle
+        selectionRect.style.display = 'block';
+        selectionRect.style.left = e.clientX + 'px';
+        selectionRect.style.top = e.clientY + 'px';
+        selectionRect.style.width = '0px';
+        selectionRect.style.height = '0px';
+        
+        e.preventDefault(); // Prevent text selection
+    }
+};
+
+// Start selection on mobile touchstart
+const handleTouchStart = (e) => {
+    // Only handle single finger touches
+    if (e.touches.length !== 1) return;
     
-    // Show the selection rectangle
-    selectionRect.style.display = 'block';
-    selectionRect.style.left = e.clientX + 'px';
-    selectionRect.style.top = e.clientY + 'px';
-    selectionRect.style.width = '0px';
-    selectionRect.style.height = '0px';
+    const touch = e.touches[0];
     
-    e.preventDefault(); // Prevent text selection
-  }
+    if (!shouldPreventSelection(e.target)) {
+        isSelecting = true;
+        selectionStart.x = touch.clientX;
+        selectionStart.y = touch.clientY;
+        
+        // Show the selection rectangle
+        selectionRect.style.display = 'block';
+        selectionRect.style.left = touch.clientX + 'px';
+        selectionRect.style.top = touch.clientY + 'px';
+        selectionRect.style.width = '0px';
+        selectionRect.style.height = '0px';
+        
+        e.preventDefault(); // Prevent scrolling and other touch behaviors
+    }
 };
 
 // Update selection rectangle during mouse move
 const handleSelectionMove = (e) => {
-  if (!isSelecting) return;
-  
-  const currentX = e.clientX;
-  const currentY = e.clientY;
-  
-  // Calculate rectangle dimensions
-  const left = Math.min(selectionStart.x, currentX);
-  const top = Math.min(selectionStart.y, currentY);
-  const width = Math.abs(currentX - selectionStart.x);
-  const height = Math.abs(currentY - selectionStart.y);
-  
-  // Update rectangle position and size
-  selectionRect.style.left = left + 'px';
-  selectionRect.style.top = top + 'px';
-  selectionRect.style.width = width + 'px';
-  selectionRect.style.height = height + 'px';
-};
-
-// End selection on mouseup
-const handleSelectionEnd = (e) => {
-  if (isSelecting) {
-    isSelecting = false;
-    selectionRect.style.display = 'none';
+    if (!isSelecting) return;
     
-    // Here you could add logic to select icons that are within the rectangle
-    // For now, we'll just hide the rectangle
-  }
+    const currentX = e.clientX;
+    const currentY = e.clientY;
+    
+    // Calculate rectangle dimensions
+    const left = Math.min(selectionStart.x, currentX);
+    const top = Math.min(selectionStart.y, currentY);
+    const width = Math.abs(currentX - selectionStart.x);
+    const height = Math.abs(currentY - selectionStart.y);
+    
+    // Update rectangle position and size
+    selectionRect.style.left = left + 'px';
+    selectionRect.style.top = top + 'px';
+    selectionRect.style.width = width + 'px';
+    selectionRect.style.height = height + 'px';
 };
 
-// Add event listeners for selection
-document.addEventListener('mousedown', handleDesktopMouseDown, true); // Use capture phase
-document.addEventListener('mousemove', (e) => {
-  handleSelectionMove(e);
-  // Also call the existing handleMove for icon dragging
-  if (typeof handleMove === 'function') {
-    handleMove(e);
-  }
-});
-document.addEventListener('mouseup', (e) => {
-  handleSelectionEnd(e);
-  // Also call the existing handleEnd for icon dragging
-  if (typeof handleEnd === 'function') {
-    handleEnd(e);
-  }
-});
+// Update selection rectangle during touch move
+const handleTouchMove = (e) => {
+    if (!isSelecting || e.touches.length !== 1) return;
+    
+    const touch = e.touches[0];
+    const currentX = touch.clientX;
+    const currentY = touch.clientY;
+    
+    // Calculate rectangle dimensions
+    const left = Math.min(selectionStart.x, currentX);
+    const top = Math.min(selectionStart.y, currentY);
+    const width = Math.abs(currentX - selectionStart.x);
+    const height = Math.abs(currentY - selectionStart.y);
+    
+    // Update rectangle position and size
+    selectionRect.style.left = left + 'px';
+    selectionRect.style.top = top + 'px';
+    selectionRect.style.width = width + 'px';
+    selectionRect.style.height = height + 'px';
+    
+    e.preventDefault(); // Prevent scrolling
+};
 
-// Stop selection if clicking and dragging an icon
-document.addEventListener('mousedown', (e) => {
-  if (e.target.closest('.icon')) {
-    isSelecting = false;
-    if (selectionRect) {
-      selectionRect.style.display = 'none';
+// End selection
+const endSelection = () => {
+    if (isSelecting) {
+        isSelecting = false;
+        selectionRect.style.display = 'none';
+        // Add your selection logic here (e.g., select icons within rectangle)
     }
-  }
-}, true);
+};
 
-// Optional: Add keyboard support to clear selection with Escape
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && isSelecting) {
-    isSelecting = false;
-    selectionRect.style.display = 'none';
-  }
-});
+// Event listeners for both desktop and mobile
+document.addEventListener('mousedown', handleDesktopMouseDown);
+document.addEventListener('mousemove', handleSelectionMove);
+document.addEventListener('mouseup', endSelection);
+
+document.addEventListener('touchstart', handleTouchStart, { passive: false });
+document.addEventListener('touchmove', handleTouchMove, { passive: false });
+document.addEventListener('touchend', endSelection);
