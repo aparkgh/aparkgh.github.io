@@ -643,6 +643,16 @@ const handleTouchStart = (e) => {
     }
 };
 
+// Helper function to check if an element overlaps with selection rectangle
+const isElementInSelection = (element, selectionBounds) => {
+    const elementRect = element.getBoundingClientRect();
+    
+    return !(elementRect.right < selectionBounds.left || 
+             elementRect.left > selectionBounds.right || 
+             elementRect.bottom < selectionBounds.top || 
+             elementRect.top > selectionBounds.bottom);
+};
+
 // Update selection rectangle during mouse move
 const handleSelectionMove = (e) => {
     if (!isSelecting) return;
@@ -661,6 +671,24 @@ const handleSelectionMove = (e) => {
     selectionRect.style.top = top + 'px';
     selectionRect.style.width = width + 'px';
     selectionRect.style.height = height + 'px';
+    
+    // Update icon selection highlighting
+    const selectionBounds = {
+        left: left,
+        top: top,
+        right: left + width,
+        bottom: top + height
+    };
+    
+    // Get all icons and update their selection state
+    const icons = document.querySelectorAll('.icon');
+    icons.forEach(icon => {
+        if (isElementInSelection(icon, selectionBounds)) {
+            icon.classList.add('selecting');
+        } else {
+            icon.classList.remove('selecting');
+        }
+    });
 };
 
 // Update selection rectangle during touch move
@@ -683,6 +711,24 @@ const handleTouchMove = (e) => {
     selectionRect.style.width = width + 'px';
     selectionRect.style.height = height + 'px';
     
+    // Update icon selection highlighting
+    const selectionBounds = {
+        left: left,
+        top: top,
+        right: left + width,
+        bottom: top + height
+    };
+    
+    // Get all icons and update their selection state
+    const icons = document.querySelectorAll('.icon');
+    icons.forEach(icon => {
+        if (isElementInSelection(icon, selectionBounds)) {
+            icon.classList.add('selecting');
+        } else {
+            icon.classList.remove('selecting');
+        }
+    });
+    
     e.preventDefault(); // Prevent scrolling
 };
 
@@ -691,7 +737,15 @@ const endSelection = () => {
     if (isSelecting) {
         isSelecting = false;
         selectionRect.style.display = 'none';
-        // Add your selection logic here (e.g., select icons within rectangle)
+        
+        // Remove selecting class from all icons
+        const icons = document.querySelectorAll('.icon');
+        icons.forEach(icon => {
+            icon.classList.remove('selecting');
+        });
+        
+        // Add your selection logic here (e.g., keep selected icons marked with 'selected' class)
+        // Example: icons with 'selecting' class could be converted to 'selected' class
     }
 };
 
