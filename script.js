@@ -194,4 +194,6 @@ function updateClock() {
 document.addEventListener('DOMContentLoaded', function () {
   updateClock();                  // Run once immediately
   setInterval(updateClock, 1000); // Then every second
+  const track = document.querySelector('.scrolling-track');
+  track.innerHTML += track.innerHTML;
 });

@@ -270,31 +270,34 @@ body, html {
 .fake-icon3 { top: 320px; right: 50px; }
 
 .scrolling-text {
-  position: relative;
   overflow: hidden;
   white-space: nowrap;
-  width: 100%;
   background: #f0f0f0;
   border-top: 1px solid #ccc;
   margin-top: 12px;
   height: 20px;
   line-height: 20px;
+  width: 840px;
 }
 
-.scrolling-text span {
+.scrolling-track {
+  display: inline-flex;
+  animation: scroll-left 5s linear infinite;
+}
+
+.scrolling-track span {
   display: inline-block;
-  padding-left: 100%;
-  animation: scroll-left 12s linear infinite;
   color: #333;
   font-size: 12px;
   font-family: 'FreePixel', Tahoma, sans-serif;
+  padding-right: 0rem;
 }
 
 @keyframes scroll-left {
   0% {
-    transform: translateX(0%);
+    transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-50%);
   }
 }

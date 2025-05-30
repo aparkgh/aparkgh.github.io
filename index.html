@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="script.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Retro Portfolio Desktop</title>
@@ -57,7 +58,9 @@
         <p>Hello! I'm Andrew Park, a student of Advanced Computing at USYD. Welcome to my retro-style portfolio!</p>
       </div>
       <div class="scrolling-text">
-        <span>scrolling text</span> <!-- infinite scrolling text in about me page-->
+        <div class="scrolling-track">
+          <span style="white-space: pre;">"ANDREW PARK" • SOUTH KOREA • ADVANCED COMPUTING • WEIGHTLIFTING • PHOTOGRAPHY • PIANO • SPEEDTYPING • ZEROWIRE • DAYCOUNTER • PARAEQ • FOLDERNUKER • </span>
+        </div>
       </div>
     </div>
 
@@ -133,11 +136,5 @@
       <div class="start-menu-item" onclick="openWindow('education-window')">Education</div>
     </div>
   </div>
-
-  <script src="script.js"></script>
-  <script>
-    updateClock();
-    setInterval(updateClock, 60000); // update every minute
-  </script>
 </body>
 </html>
