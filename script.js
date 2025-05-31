@@ -532,6 +532,10 @@ document.addEventListener("DOMContentLoaded", function () {
       alert(
         "🎉 ...Oh? You found the secret desktop message!\n\nThanks for exploring my portfolio!"
       );
+      
+      // Reveal the TEST icon after the secret is found
+      revealTestIcon();
+      
       userInput = [];
     }
   });
@@ -549,7 +553,7 @@ function updateClock() {
 }
 
 class Icon {
-  constructor(text, onclick, imageSource, location, desktopPosition) {
+  constructor(text, onclick, imageSource, location, desktopPosition, hidden = false) {
     this.text = text;
     this.onclick = onclick;
     this.imageSource = imageSource;
@@ -557,6 +561,7 @@ class Icon {
     this.desktopPosition = desktopPosition; // custom desktop positioning
     this.isBeingDragged = false;
     this.dragOffset = { x: 0, y: 0 }; // Store offset from mouse to icon position
+    this.hidden = hidden; // New property to control visibility
   }
 }
 
@@ -647,9 +652,20 @@ const icons = [
     },
     "assets/icons/windows.png",
     { x: 0, y: 0 },
-    { top: 500, right: 1000 }
+    { top: 500, right: 1000 },
+    true // Set hidden to true initially
   ),
 ];
+
+// Function to find the TEST icon and reveal it
+function revealTestIcon() {
+  const testIcon = icons.find(icon => icon.text === "TEST");
+  if (testIcon) {
+    testIcon.hidden = false;
+    // You'll need to call your render/display function here to update the UI
+    renderAllIcons(); // Replace with your actual render function name
+  }
+}
 
 // Function to check if device is mobile
 const isMobile = () => {
@@ -831,7 +847,9 @@ const renderAllIcons = () => {
   
   // Render all icons
   icons.forEach((icon) => {
-    desktop.appendChild(getIconElement(icon));
+    if (!icon.hidden) {
+      desktop.appendChild(getIconElement(icon));
+    }
   });
 };
 
