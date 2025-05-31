@@ -563,11 +563,11 @@ const icons = [
     { top: 50, left: 50 }
   ),
   new Icon(
-    "Projects",
-    () => openWindow("projects-window"),
-    "assets/icons/projects.png",
+    "Zerowire",
+    () => window.open("https://github.com/aparkgh/zerowire"),
+    "assets/icons/zerowire.png",
     { x: 0, y: 0 },
-    { top: 150, left: 200 }
+    { top: 120, left: 350 }
   ),
   new Icon(
     "Technologies",
@@ -591,38 +591,25 @@ const icons = [
     { top: 300, left: 100 }
   ),
   new Icon(
-    "GitHub",
-    () => window.open("https://github.com/aparkgh"),
-    "assets/icons/github.png",
+    "Snake",
+    () => openWindow("https://github.com/aparkgh/snake"),
+    "assets/icons/snake.png",
     { x: 0, y: 0 },
     { top: 250, left: 400 }
   ),
   new Icon(
-    "LinkedIn",
-    () => window.open("https://www.linkedin.com/in/andrewpark-/"),
-    "assets/icons/linkedin.webp",
+    "Folder Nuker",
+    () => window.open("https://github.com/aparkgh/foldernuker"),
+    "assets/icons/foldernuker.png",
     { x: 0, y: 0 },
-    { top: 120, left: 350 }
+    { top: 150, left: 200 }
   ),
   new Icon(
-      "Email",
-      () => {
-          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-          
-          if (isMobile) {
-              window.location.href = "mailto:andrew.park6126@gmail.com";
-          } else {
-              // Try to open Gmail, with mailto as fallback
-              try {
-                  window.open("https://mail.google.com/mail/?view=cm&fs=1&to=andrew.park6126@gmail.com", "_blank");
-              } catch (error) {
-                  window.location.href = "mailto:andrew.park6126@gmail.com";
-              }
-          }
-      },
-      "assets/icons/email.png",
-      { x: 0, y: 0 },
-      { top: 350, right: 150 }
+    "Day Counter",
+    () => window.open("https://github.com/aparkgh/daycounter"),
+    "assets/icons/daycounter.png",
+    { x: 0, y: 0 },
+    { top: 350, right: 150 }
   ),
   new Icon(
     "Spotify",
