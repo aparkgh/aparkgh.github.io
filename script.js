@@ -1,40 +1,42 @@
-// Window management with interaction tracking
+// Window management with drag/resize tracking
 function openWindow(id) {
+  console.log(id);
   const win = document.getElementById(id);
   if (!win) return; // Safety check
   
   // Initialize tracking variables if not present
-  if (!window.userInteractedWindows) {
-    window.userInteractedWindows = new Set();
+  if (!window.windowStates) {
+    window.windowStates = {};
+  }
+  
+  // Initialize window state if not present
+  if (!window.windowStates[id]) {
+    window.windowStates[id] = {
+      hasBeenInteracted: false,
+      savedPosition: null,
+      savedSize: null
+    };
   }
   
   // Show window initially
   win.style.display = "block";
   win.style.visibility = "visible";
   
-  // Check if this window has been interacted with before
-  const hasBeenInteracted = window.userInteractedWindows.has(id);
+  const windowState = window.windowStates[id];
+  console.log(`Window ${id} has been interacted: ${windowState.hasBeenInteracted}`);
   
-  // Set window size
-  if (hasBeenInteracted) {
+  // Set window size and position
+  if (windowState.hasBeenInteracted && windowState.savedPosition && windowState.savedSize) {
     // Window has been interacted with - restore saved size and position
-    const storedWidth = getStoredValue(`${id}-width`);
-    const storedHeight = getStoredValue(`${id}-height`);
-    const storedLeft = getStoredValue(`${id}-left`);
-    const storedTop = getStoredValue(`${id}-top`);
-    
-    if (storedWidth && storedHeight) {
-      win.style.width = storedWidth;
-      win.style.height = storedHeight;
-      win.style.maxWidth = "none";
-    }
-    
-    if (storedLeft && storedTop) {
-      win.style.left = storedLeft;
-      win.style.top = storedTop;
-    }
+    console.log(`Restoring saved position and size for ${id}`);
+    win.style.width = windowState.savedSize.width;
+    win.style.height = windowState.savedSize.height;
+    win.style.left = windowState.savedPosition.left;
+    win.style.top = windowState.savedPosition.top;
+    win.style.maxWidth = "none";
   } else {
-    // Window hasn't been interacted with - use random size and position
+    // Window hasn't been interacted with or no saved data - use random size and position
+    console.log(`Setting random position and size for ${id}`);
     let minWidth, maxWidth;
     
     if (id === 'about-window') {
@@ -97,15 +99,56 @@ function openWindow(id) {
   // Add resize observer for future resizing detection
   if (!win.resizeObserver) {
     let initialResize = true;
+    let lastWidth = win.offsetWidth;
+    let lastHeight = win.offsetHeight;
+    let isUserResizing = false;
+    
+    // Track when user starts resizing (mouse down on resize handles)
+    win.addEventListener('mousedown', (e) => {
+      // Check if clicking near edges (resize handles)
+      const rect = win.getBoundingClientRect();
+      const edgeThreshold = 10;
+      const isNearRightEdge = e.clientX > rect.right - edgeThreshold;
+      const isNearBottomEdge = e.clientY > rect.bottom - edgeThreshold;
+      const isNearLeftEdge = e.clientX < rect.left + edgeThreshold;
+      const isNearTopEdge = e.clientY < rect.top + edgeThreshold;
+      
+      if (isNearRightEdge || isNearBottomEdge || isNearLeftEdge || isNearTopEdge) {
+        isUserResizing = true;
+        console.log(`User started resizing window ${id}`);
+      }
+    });
+    
+    // Reset resize flag when mouse is released
+    document.addEventListener('mouseup', () => {
+      if (isUserResizing) {
+        isUserResizing = false;
+        console.log(`User stopped resizing window ${id}`);
+      }
+    });
     
     win.resizeObserver = new ResizeObserver(() => {
       if (initialResize) {
         initialResize = false;
+        lastWidth = win.offsetWidth;
+        lastHeight = win.offsetHeight;
         return;
       }
       
-      // Mark window as interacted with when resized
-      markWindowAsInteracted(id);
+      const currentWidth = win.offsetWidth;
+      const currentHeight = win.offsetHeight;
+      
+      // Only mark as interacted if there was a significant size change AND user was actively resizing
+      const widthChanged = Math.abs(currentWidth - lastWidth) > 5;
+      const heightChanged = Math.abs(currentHeight - lastHeight) > 5;
+      
+      if ((widthChanged || heightChanged) && isUserResizing) {
+        console.log(`Window ${id} has been RESIZED by user - marking as interacted`);
+        markWindowAsInteracted(id);
+      }
+      
+      lastWidth = currentWidth;
+      lastHeight = currentHeight;
     });
     win.resizeObserver.observe(win);
   }
@@ -118,51 +161,103 @@ function openWindow(id) {
 
 // Helper function to mark a window as interacted with
 function markWindowAsInteracted(windowId) {
-  if (!window.userInteractedWindows) {
-    window.userInteractedWindows = new Set();
+  if (!window.windowStates) {
+    window.windowStates = {};
   }
-  window.userInteractedWindows.add(windowId);
+  if (!window.windowStates[windowId]) {
+    window.windowStates[windowId] = {
+      hasBeenInteracted: false,
+      savedPosition: null,
+      savedSize: null
+    };
+  }
+  window.windowStates[windowId].hasBeenInteracted = true;
 }
 
 // Helper function to save window state
 function saveWindowState(windowId) {
   const win = document.getElementById(windowId);
-  if (win && window.userInteractedWindows && window.userInteractedWindows.has(windowId)) {
-    storeValue(`${windowId}-left`, win.style.left);
-    storeValue(`${windowId}-top`, win.style.top);
-    storeValue(`${windowId}-width`, win.style.width);
-    storeValue(`${windowId}-height`, win.style.height);
+  if (win && window.windowStates && window.windowStates[windowId]) {
+    window.windowStates[windowId].savedPosition = {
+      left: win.style.left,
+      top: win.style.top
+    };
+    window.windowStates[windowId].savedSize = {
+      width: win.style.width,
+      height: win.style.height
+    };
+    console.log(`Saved state for window ${windowId}:`, window.windowStates[windowId]);
   }
 }
 
-// Storage helper functions (using in-memory storage for Claude.ai compatibility)
-const windowStorage = {};
-
-function storeValue(key, value) {
-  windowStorage[key] = value;
+// Helper function to randomize window position
+function randomizeWindowPosition(windowId) {
+  const win = document.getElementById(windowId);
+  if (!win) return;
+  
+  console.log(`Randomizing position for window ${windowId}`);
+  
+  // Get current dimensions
+  const winWidth = win.offsetWidth || 400;
+  const winHeight = win.offsetHeight || 300;
+  
+  // Calculate random position
+  const maxX = Math.max(0, window.innerWidth - winWidth);
+  const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
+  
+  const centerX = (window.innerWidth - winWidth) / 2;
+  const centerY = (window.innerHeight - winHeight) / 2;
+  
+  const offsetX = (Math.random() - 0.5) * Math.min(1000, maxX);
+  const offsetY = (Math.random() - 0.5) * Math.min(400, maxY);
+  
+  const targetX = Math.floor(centerX + offsetX);
+  const targetY = Math.floor(centerY + offsetY);
+  
+  // Clamp position to screen bounds
+  const clampedX = Math.max(0, Math.min(targetX, maxX));
+  const clampedY = Math.max(0, Math.min(targetY, maxY));
+  
+  // Store the randomized position
+  if (!window.windowStates) {
+    window.windowStates = {};
+  }
+  if (!window.windowStates[windowId]) {
+    window.windowStates[windowId] = {
+      hasBeenInteracted: false,
+      savedPosition: null,
+      savedSize: null
+    };
+  }
+  
+  window.windowStates[windowId].savedPosition = {
+    left: `${clampedX}px`,
+    top: `${clampedY}px`
+  };
+  
+  console.log(`Randomized position for ${windowId}: ${clampedX}px, ${clampedY}px`);
 }
 
-function getStoredValue(key) {
-  return windowStorage[key];
-}
-
-function removeStoredValue(key) {
-  delete windowStorage[key];
-}
-
-// Close window function - now handles interaction tracking
+// Close window function - now handles interaction tracking and position saving/randomizing
 function closeWindow(id, isManualClose = false) {
+  console.log(`Closing window ${id}, manual: ${isManualClose}`);
   const win = document.getElementById(id);
   if (!win) return;
   
-  // If this is a manual close (X button), mark as interacted
-  if (isManualClose) {
-    markWindowAsInteracted(id);
-  }
+  // Check if window has been interacted with (dragged or resized)
+  const windowState = window.windowStates && window.windowStates[id];
+  const hasBeenInteracted = windowState && windowState.hasBeenInteracted;
   
-  // Only save state if window has been interacted with
-  if (window.userInteractedWindows && window.userInteractedWindows.has(id)) {
+  console.log(`Window ${id} interaction status: ${hasBeenInteracted}`);
+  
+  if (hasBeenInteracted) {
+    // Window has been dragged or resized - save its current position and size
+    console.log(`Window ${id} has been interacted with - saving position and size`);
     saveWindowState(id);
+  } else {
+    // Window hasn't been dragged or resized - randomize its position for next time
+    console.log(`Window ${id} has NOT been interacted with - randomizing position`);
+    randomizeWindowPosition(id);
   }
   
   win.style.display = "none";
@@ -187,7 +282,7 @@ function handleEscapeKey(e) {
     });
     
     if (topWindow) {
-      // Close without marking as interacted (isManualClose = false)
+      // Close without marking as manual close
       closeWindow(topWindow.id, false);
     }
   }
@@ -222,6 +317,7 @@ function makeDraggable(win) {
   }
 
   function startDrag(e) {
+    console.log("[startDrag] Start Dragging")
     if (e.target.tagName === "BUTTON") return;
 
     isDragging = true;
@@ -272,6 +368,7 @@ function makeDraggable(win) {
       if (hasMoved) {
         const windowId = win.id;
         if (windowId) {
+          console.log(`Window ${windowId} has been DRAGGED - marking as interacted`);
           markWindowAsInteracted(windowId);
         }
       }
@@ -296,7 +393,7 @@ function makeDraggable(win) {
 // Function to setup close buttons with manual close tracking
 function setupCloseButtons() {
   document.querySelectorAll(".window").forEach((win) => {
-    const closeButton = win.querySelector(".close-btn, .window-close, [data-close]");
+    const closeButton = win.querySelector(".window-header button, .close-btn, .window-close, [data-close]");
     if (closeButton) {
       closeButton.addEventListener("click", () => {
         closeWindow(win.id, true); // Mark as manual close
@@ -307,13 +404,10 @@ function setupCloseButtons() {
 
 // Helper function to clear stored data for testing
 function clearWindowMemory(windowId) {
-  if (window.userInteractedWindows) {
-    window.userInteractedWindows.delete(windowId);
+  if (window.windowStates && window.windowStates[windowId]) {
+    delete window.windowStates[windowId];
   }
-  removeStoredValue(`${windowId}-left`);
-  removeStoredValue(`${windowId}-top`);
-  removeStoredValue(`${windowId}-width`);
-  removeStoredValue(`${windowId}-height`);
+  console.log(`Cleared memory for window ${windowId}`);
 }
 
 // Handle window resize
