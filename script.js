@@ -168,6 +168,7 @@ function setupContentHeightConstraints(win, id) {
 
 function setupResizeObserver(win, id) {
   let isUserResizing = false;
+  let resizeTimeout;
   
   // Track when user starts resizing (mouse down on resize handles)
   win.addEventListener('mousedown', (e) => {
@@ -192,17 +193,21 @@ function setupResizeObserver(win, id) {
       console.log(`User stopped resizing window ${id}`);
       // Mark as interacted when user finishes resizing
       markWindowAsInteracted(id);
+      
+      // Only recalculate content constraints after resize is complete
+      if (id !== 'confirm-window') {
+        setupContentHeightConstraints(win, id);
+      }
     }
   });
   
   win.resizeObserver = new ResizeObserver(() => {
-    // Update content-based height constraints whenever window is resized
-    // Skip for confirm windows to prevent shrinking
-    if (id !== 'confirm-window') {
-      setupContentHeightConstraints(win, id);
+    // Clear any pending timeout
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout);
     }
     
-    // Update max dimensions based on current position
+    // Update max dimensions based on current position (this is lightweight)
     const currentX = parseInt(win.style.left) || 0;
     const currentY = parseInt(win.style.top) || 0;
     
@@ -214,6 +219,14 @@ function setupResizeObserver(win, id) {
     const taskbarHeight = 40;
     const maxAllowedHeight = window.innerHeight - currentY - taskbarHeight;
     win.style.maxHeight = `${maxAllowedHeight}px`;
+    
+    // Only recalculate content constraints if user is NOT actively resizing
+    // and debounce the expensive operation
+    if (!isUserResizing && id !== 'confirm-window') {
+      resizeTimeout = setTimeout(() => {
+        setupContentHeightConstraints(win, id);
+      }, 150); // Debounce by 150ms
+    }
   });
   
   win.resizeObserver.observe(win);
