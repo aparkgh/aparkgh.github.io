@@ -18,13 +18,8 @@ PARK95
 
 ![PARK95 Screenshot](/assets/park95.png)
 
-### Features
-
-* Draggable Windows: Click and drag any window around the desktop
-* Resizable Windows: Grab the edges to resize windows naturally
-* Window Management: Minimize, maximize, and close buttons that actually work
-* Taskbar Integration: Active windows appear in the taskbar with proper focus management
-* Z-Index Management: Windows properly layer and come to front when clicked
+Each window supports moving, resizing (only desktop), and closing. Additionally, windows properly layer and come to front when clicked. Window position is randomised until window is interacted with. The taskbar features a working start menu and a clock which updates in real time to the time zone of your browser.
+<!-- Active windows appear in the taskbar with proper focus management-->
 
 ## Project Structure
 ```
