@@ -658,7 +658,7 @@ const icons = [
     { top: 450, right: 320 }
   ),
   new Icon(
-    "TEST",
+    "W95TEST",
     () => {
       pendingLink = "https://aparkgh.github.io/assets/buttoncatch";
       // Add rainbow class before opening window
@@ -674,7 +674,7 @@ const icons = [
 
 // Function to find the TEST icon and reveal it
 function revealTestIcon() {
-  const testIcon = icons.find(icon => icon.text === "TEST");
+  const testIcon = icons.find(icon => icon.text === "W95TEST");
   if (testIcon) {
     testIcon.hidden = false;
     // You'll need to call your render/display function here to update the UI
