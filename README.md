@@ -1,6 +1,6 @@
 <h1 align="center">
       <!-- logo credit: https://www.vexels.com/png-svg/preview/325937/blue-computer-mouse-icon -->
-      <img src="/assets/scooter.webp" width="96px" height="96px"/>
+      <img src="/assets/logo.png" width="96px" height="96px"/>
 
 PARK95
 
