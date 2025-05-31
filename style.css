@@ -57,11 +57,11 @@ html {
 
 .icon {
     position: absolute;
-    width: 80px;
+    width: 90px;
     text-align: center;
     color: white;
     cursor: pointer;
-    padding: 8px;
+    padding: 10px;
     border-radius: 4px;
     transition: background 0.2s;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
@@ -73,15 +73,15 @@ html {
 }
 
 .icon img {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     margin-bottom: 4px;
     filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .icon span {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: bold;
 }
 
