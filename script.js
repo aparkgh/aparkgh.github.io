@@ -24,9 +24,21 @@ function openWindow(id) {
   win.style.left = `${clampedX}px`;
   win.style.top = `${clampedY}px`;
 
-  // This code runs only when opening contact window
-  if (id === 'contact-window') {
-    win.style.maxWidth = "450px";
+  // This code runs only when initialising opening a window
+  const initializedWindows = new Set();
+
+  if (!win.hasBeenInitialized) {
+    if (id === 'about-window') {
+      win.style.width = "870px";  // Changed from maxWidth to width
+    } else if (id === 'contact-window') {
+      win.style.width = "450px";  // Changed from maxWidth to width
+    } else if (id === 'projects-window') {
+      win.style.width = "450px";  // Changed from maxWidth to width
+    } else if (id === 'education-window') {
+      win.style.width = "450px";  // Changed from maxWidth to width
+    }
+    
+    win.hasBeenInitialized = true;
   }
 
   // Show it for real
