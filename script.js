@@ -125,8 +125,8 @@ function setupContentHeightConstraints(win, id) {
   
   if (!windowHeader || !windowBody) return;
   
-  // For confirm windows, only set height constraints once to prevent shrinking
-  if (id === 'confirm-window' && win.dataset.heightSet === 'true') {
+  // For certain windows, only set height constraints once to prevent shrinking
+  if ((id === 'confirm-window' || id === 'projects-window') && win.dataset.heightSet === 'true') {
     return;
   }
   
@@ -169,8 +169,8 @@ function setupContentHeightConstraints(win, id) {
   }
   // If current window is larger than required minimum, don't change anything
   
-  // For confirm windows, also set a fixed height to prevent shrinking
-  if (id === 'confirm-window') {
+  // For certain windows, also set a fixed height to prevent shrinking
+  if (id === 'confirm-window' || id === 'projects-window') {
     win.style.height = `${requiredMinHeight}px`;
     win.dataset.heightSet = 'true'; // Mark as set to prevent future changes
   }
@@ -210,7 +210,7 @@ function setupResizeObserver(win, id) {
       markWindowAsInteracted(id);
       
       // Only recalculate content constraints after resize is complete
-      if (id !== 'confirm-window') {
+      if (id !== 'confirm-window' && id !== 'projects-window') {
         setupContentHeightConstraints(win, id);
       }
     }
@@ -237,7 +237,7 @@ function setupResizeObserver(win, id) {
     
     // Only recalculate content constraints if user is NOT actively resizing
     // and debounce the expensive operation
-    if (!isUserResizing && id !== 'confirm-window') {
+    if (!isUserResizing && id !== 'confirm-window' && id !== 'projects-window') {
       resizeTimeout = setTimeout(() => {
         setupContentHeightConstraints(win, id);
       }, 150); // Debounce by 150ms
