@@ -130,6 +130,9 @@ function setupContentHeightConstraints(win, id) {
     return;
   }
   
+  // Get current window height before making changes
+  const currentWindowHeight = win.offsetHeight;
+  
   // Get header height
   const headerHeight = windowHeader.offsetHeight;
   
@@ -146,15 +149,20 @@ function setupContentHeightConstraints(win, id) {
   windowBody.offsetHeight;
   const contentHeight = windowBody.scrollHeight;
   
-  // Calculate total minimum height
-  const totalMinHeight = headerHeight + contentHeight + 20; // Add some padding
+  // Calculate total minimum height needed for content
+  const requiredMinHeight = headerHeight + contentHeight + 20; // Add some padding
+  
+  // Only update minHeight if:
+  // 1. Current window is smaller than required minimum (user made it too small)
+  // 2. OR we don't have a minHeight set yet
+  const currentMinHeight = parseInt(win.style.minHeight) || 0;
   
   // Set minimum height on the window
   win.style.minHeight = `${totalMinHeight}px`;
   
   // For confirm windows, also set a fixed height to prevent shrinking
   if (id === 'confirm-window') {
-    win.style.height = `${totalMinHeight}px`;
+    win.style.height = `${requiredMinHeight}px`;
     win.dataset.heightSet = 'true'; // Mark as set to prevent future changes
   }
   
@@ -162,8 +170,6 @@ function setupContentHeightConstraints(win, id) {
   windowBody.style.height = originalHeight;
   windowBody.style.maxHeight = originalMaxHeight;
   windowBody.style.overflowY = originalOverflow;
-  
-  console.log(`Set minimum height for ${id}: ${totalMinHeight}px (header: ${headerHeight}px, content: ${contentHeight}px)`);
 }
 
 function setupResizeObserver(win, id) {
