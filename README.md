@@ -28,19 +28,18 @@ PARK95
 
 ## Project Structure
 ```
-├── index.html              # Main HTML file
-├── styles/
-│   ├── main.css           # Core styling and layout
-│   ├── windows.css        # Window-specific styles
-│   └── components.css     # UI component styles
-├── scripts/
-│   ├── main.js           # Core application logic
-│   ├── windows.js        # Window management system
-│   └── taskbar.js        # Taskbar functionality
 ├── assets/
-│   ├── icons/            # System and application icons
-│   ├── images/           # Background and content images
-│   └── sounds/           # Optional UI sound effects
+│   ├── buttoncatch/
+│   │   ├── index.html
+│   │   ├── script.js
+│   │   └── style.css
+│   ├── icons/
+│   │   └── [...]
+│   └── [...]
+├── grainstyle.css
+├── index.html
+├── script.js
+├── style.css
 └── README.md
 ```
 
