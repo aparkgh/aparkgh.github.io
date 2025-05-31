@@ -115,6 +115,7 @@ function openWindow(id) {
       
       if (isNearRightEdge || isNearBottomEdge || isNearLeftEdge || isNearTopEdge) {
         isUserResizing = true;
+        markWindowAsInteracted(id);
         console.log(`User started resizing window ${id}`);
       }
     });
@@ -328,6 +329,14 @@ function makeDraggable(win) {
     initialY = coords.y - win.offsetTop;
 
     header.style.cursor = "grabbing";
+    
+    // Mark as interacted immediately when drag starts (i.e., when header is clicked)
+    const windowId = win.id;
+    if (windowId) {
+      console.log(`Window ${windowId} header clicked - marking as interacted`);
+      markWindowAsInteracted(windowId);
+    }
+    
     e.preventDefault();
   }
 
@@ -338,9 +347,10 @@ function makeDraggable(win) {
     currentX = coords.x - initialX;
     currentY = coords.y - initialY;
 
-    // Check if window has actually moved
-    if (!hasMoved && (Math.abs(currentX - win.offsetLeft) > 5 || Math.abs(currentY - win.offsetTop) > 5)) {
+    // Mark as moved if position changes at all
+    if (!hasMoved && (currentX !== win.offsetLeft || currentY !== win.offsetTop)) {
       hasMoved = true;
+      console.log(`Window ${win.id} movement detected - marking as moved`);
     }
 
     // Clamps window to desktop so they stay within viewport
@@ -364,13 +374,9 @@ function makeDraggable(win) {
       isDragging = false;
       header.style.cursor = "move";
       
-      // Only mark as interacted if the window actually moved
+      // We've already marked as interacted in startDrag, so no need to do it again here
       if (hasMoved) {
-        const windowId = win.id;
-        if (windowId) {
-          console.log(`Window ${windowId} has been DRAGGED - marking as interacted`);
-          markWindowAsInteracted(windowId);
-        }
+        console.log(`Window ${win.id} was actually dragged (moved)`);
       }
     }
   }
