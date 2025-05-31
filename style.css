@@ -308,7 +308,7 @@ html {
 /* Contact icon styles */
 .window-body-contact {
     display: flex;
-    overflow: auto;
+    /* overflow: auto; */
     padding: 12px 16px;
     background: #f0f0f0;
     flex-direction: row;

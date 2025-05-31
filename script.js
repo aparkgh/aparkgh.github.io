@@ -121,66 +121,90 @@ function openWindow(id) {
 
 function setupContentHeightConstraints(win, id) {
   const windowHeader = win.querySelector('.window-header');
-  const windowBody = win.querySelector('.window-body');
+  const windowBody = win.querySelector('.window-body') || win.querySelector('.window-body-contact');
   
   if (!windowHeader || !windowBody) return;
   
-  // For certain windows, only set height constraints once to prevent shrinking
-  if ((id === 'confirm-window' || id === 'projects-window' || id === 'experience-window'
-    || id === 'education-window' || id === 'technologies-window') && win.dataset.heightSet === 'true') {
+  // For certain windows, only set height constraints once to prevent shrinking and incremental height bugs
+  if ((id === 'confirm-window' || id === 'projects-window' || id === 'contact-window') && win.dataset.heightSet === 'true') {
     return;
   }
-  
-  // Get current window height before making changes
-  const currentWindowHeight = win.offsetHeight;
   
   // Get header height
   const headerHeight = windowHeader.offsetHeight;
   
-  // Temporarily allow body to expand to measure natural content height
-  const originalHeight = windowBody.style.height;
-  const originalMaxHeight = windowBody.style.maxHeight;
-  const originalOverflow = windowBody.style.overflowY;
-  
-  windowBody.style.height = 'auto';
-  windowBody.style.maxHeight = 'none';
-  windowBody.style.overflowY = 'visible';
-  
-  // Force reflow and measure
-  windowBody.offsetHeight;
-  const contentHeight = windowBody.scrollHeight;
-  
-  // Calculate total minimum height needed for content
-  const requiredMinHeight = headerHeight + contentHeight + 20; // Add some padding
-  
-  // Only update minHeight if:
-  // 1. Current window is smaller than required minimum (user made it too small)
-  // 2. OR we don't have a minHeight set yet
-  const currentMinHeight = parseInt(win.style.minHeight) || 0;
-  
-  if (currentWindowHeight < requiredMinHeight || currentMinHeight === 0) {
-    // User made window too small or no minimum set - set the minimum
+  // For fixed-height windows, measure content in a clean state
+  if (id === 'confirm-window' || id === 'projects-window' || id === 'contact-window') {
+    // Temporarily reset window to measure natural content size
+    const originalWindowHeight = win.style.height;
+    const originalWindowMinHeight = win.style.minHeight;
+    const originalBodyHeight = windowBody.style.height;
+    const originalBodyMaxHeight = windowBody.style.maxHeight;
+    const originalBodyOverflow = windowBody.style.overflowY;
+    
+    // Reset to natural sizing
+    win.style.height = 'auto';
+    win.style.minHeight = 'auto';
+    windowBody.style.height = 'auto';
+    windowBody.style.maxHeight = 'none';
+    windowBody.style.overflowY = 'visible';
+    
+    // Force reflow and measure natural size
+    win.offsetHeight;
+    const naturalWindowHeight = win.offsetHeight;
+    const naturalBodyHeight = windowBody.scrollHeight;
+    
+    // Calculate required height (natural height is already correct, just add small buffer)
+    const requiredHeight = naturalWindowHeight + 10; // Small buffer for safety
+    
+    // Set the fixed height
+    win.style.height = `${requiredHeight}px`;
+    win.style.minHeight = `${requiredHeight}px`;
+    win.dataset.heightSet = 'true';
+    
+    console.log(`Set fixed height for ${id}: ${requiredHeight}px (natural: ${naturalWindowHeight}px)`);
+    
+    // Restore body styles (but leave window height as set)
+    windowBody.style.height = originalBodyHeight;
+    windowBody.style.maxHeight = originalBodyMaxHeight;
+    windowBody.style.overflowY = originalBodyOverflow;
+  } else {
+    // For other windows, only set minHeight once to prevent incremental increases
+    if (win.dataset.minHeightSet === 'true') {
+      return;
+    }
+    
+    // Reset window to natural sizing to measure properly
+    const originalWindowHeight = win.style.height;
+    const originalWindowMinHeight = win.style.minHeight;
+    const originalBodyHeight = windowBody.style.height;
+    const originalBodyMaxHeight = windowBody.style.maxHeight;
+    const originalBodyOverflow = windowBody.style.overflowY;
+    
+    // Reset to natural sizing
+    win.style.height = 'auto';
+    win.style.minHeight = 'auto';
+    windowBody.style.height = 'auto';
+    windowBody.style.maxHeight = 'none';
+    windowBody.style.overflowY = 'visible';
+    
+    // Force reflow and measure natural size
+    win.offsetHeight;
+    const naturalWindowHeight = win.offsetHeight;
+    
+    // Set minimum height based on natural size
+    const requiredMinHeight = naturalWindowHeight + 10; // Small buffer
     win.style.minHeight = `${requiredMinHeight}px`;
-    console.log(`Set minimum height for ${id}: ${requiredMinHeight}px (content requires this)`);
-  } else if (requiredMinHeight < currentMinHeight && currentWindowHeight > requiredMinHeight) {
-    // Content got smaller and current window is larger than required - allow smaller minimum
-    win.style.minHeight = `${requiredMinHeight}px`;
-    console.log(`Reduced minimum height for ${id}: ${requiredMinHeight}px (content is smaller)`);
-    // But don't force the window to shrink - let user decide
+    win.dataset.minHeightSet = 'true'; // Mark as set to prevent future changes
+    
+    console.log(`Set minimum height for ${id}: ${requiredMinHeight}px (natural: ${naturalWindowHeight}px)`);
+    
+    // Restore original styles (except minHeight which we want to keep)
+    win.style.height = originalWindowHeight;
+    windowBody.style.height = originalBodyHeight;
+    windowBody.style.maxHeight = originalBodyMaxHeight;
+    windowBody.style.overflowY = originalBodyOverflow;
   }
-  // If current window is larger than required minimum, don't change anything
-  
-  // For certain windows, also set a fixed height to prevent shrinking
-  if (id === 'confirm-window' || id === 'projects-window' || id === 'experience-window'
-    || id === 'education-window' || id === 'technologies-window') {
-    win.style.height = `${requiredMinHeight}px`;
-    win.dataset.heightSet = 'true'; // Mark as set to prevent future changes
-  }
-  
-  // Restore original body styles
-  windowBody.style.height = originalHeight;
-  windowBody.style.maxHeight = originalMaxHeight;
-  windowBody.style.overflowY = originalOverflow;
 }
 
 function setupResizeObserver(win, id) {
@@ -212,8 +236,7 @@ function setupResizeObserver(win, id) {
       markWindowAsInteracted(id);
       
       // Only recalculate content constraints after resize is complete
-      if (id === 'confirm-window' || id === 'projects-window' || id === 'experience-window'
-    || id === 'education-window' || id === 'technologies-window') {
+      if (id !== 'confirm-window' && id !== 'projects-window' && id !== 'contact-window') {
         setupContentHeightConstraints(win, id);
       }
     }
@@ -240,12 +263,14 @@ function setupResizeObserver(win, id) {
     
     // Only recalculate content constraints if user is NOT actively resizing
     // and debounce the expensive operation
-    if (!isUserResizing && id !== 'confirm-window' && id !== 'projects-window'
-       && id !== 'experience-window' && id !== 'education-window' && id !== 'technologies-window'
-    ) {
-      resizeTimeout = setTimeout(() => {
-        setupContentHeightConstraints(win, id);
-      }, 150); // Debounce by 150ms
+    if (!isUserResizing && id !== 'confirm-window' && id !== 'projects-window' && id !== 'contact-window') {
+      // Only run if minHeight hasn't been set yet
+      const win = this.target || win;
+      if (!win.dataset.minHeightSet) {
+        resizeTimeout = setTimeout(() => {
+          setupContentHeightConstraints(win, id);
+        }, 150); // Debounce by 150ms
+      }
     }
   });
   
