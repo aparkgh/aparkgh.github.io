@@ -778,6 +778,18 @@ const icons = [
     // 310 430
   ),
   new Icon(
+    "ParaEQ",
+    () => {
+      pendingLink = "https://github.com/aparkgh/paraeq";
+      document.getElementById('confirm-window').classList.remove('rainbow-window');
+      openWindow("confirm-window");
+    },
+    "assets/icons/equaliser.png",
+    { x: 0, y: 0 },
+    { top: 470, right: 230 }
+    // 310 430
+  ),
+  new Icon(
     "W95TEST",
     () => {
       pendingLink = "https://aparkgh.github.io/assets/buttoncatch";
