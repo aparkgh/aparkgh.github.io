@@ -1,4 +1,3 @@
-// Window management with drag/resize tracking
 function openWindow(id) {
   console.log(id);
   const win = document.getElementById(id);
@@ -106,73 +105,118 @@ function openWindow(id) {
   win.style.display = "flex";
   win.style.visibility = "visible";
   
+  // Set up content-based height constraints
+  setupContentHeightConstraints(win, id);
+  
   // Add resize observer for future resizing detection
   if (!win.resizeObserver) {
-    let initialResize = true;
-    let lastWidth = win.offsetWidth;
-    let lastHeight = win.offsetHeight;
-    let isUserResizing = false;
-    
-    // Track when user starts resizing (mouse down on resize handles)
-    win.addEventListener('mousedown', (e) => {
-      // Check if clicking near edges (resize handles)
-      const rect = win.getBoundingClientRect();
-      const edgeThreshold = 10;
-      const isNearRightEdge = e.clientX > rect.right - edgeThreshold;
-      const isNearBottomEdge = e.clientY > rect.bottom - edgeThreshold;
-      const isNearLeftEdge = e.clientX < rect.left + edgeThreshold;
-      const isNearTopEdge = e.clientY < rect.top + edgeThreshold;
-      
-      if (isNearRightEdge || isNearBottomEdge || isNearLeftEdge || isNearTopEdge) {
-        isUserResizing = true;
-        markWindowAsInteracted(id);
-        console.log(`User started resizing window ${id}`);
-      }
-    });
-    
-    // Reset resize flag when mouse is released
-    document.addEventListener('mouseup', () => {
-      if (isUserResizing) {
-        isUserResizing = false;
-        console.log(`User stopped resizing window ${id}`);
-      }
-    });
-    
-win.resizeObserver = new ResizeObserver(() => {
-  if (initialResize) {
-    initialResize = false;
-    lastWidth = win.offsetWidth;
-    lastHeight = win.offsetHeight;
-    return;
-  }
-  
-  const currentWidth = win.offsetWidth;
-  const currentHeight = win.offsetHeight;
-  let currentX = parseInt(win.style.left) || 0;
-  
-  // Set CSS max-width to prevent browser from allowing resize beyond bounds
-  const maxAllowedWidth = window.innerWidth - currentX;
-  win.style.maxWidth = `${maxAllowedWidth}px`;
-  
-  // Rest of your existing code...
-  const widthChanged = Math.abs(currentWidth - lastWidth) > 1;
-  const heightChanged = Math.abs(currentHeight - lastHeight) > 1;
-  
-  if ((widthChanged || heightChanged) && isUserResizing) {
-    console.log(`Window ${id} has been RESIZED by user - marking as interacted`);
-    markWindowAsInteracted(id);
-  }
-  
-  lastWidth = win.offsetWidth;
-  lastHeight = win.offsetHeight;
-});
-    win.resizeObserver.observe(win);
+    setupResizeObserver(win, id);
   }
   
   // Bring window to front
   if (typeof bringToFront === 'function') {
     bringToFront(win);
   }
+}
+
+function setupContentHeightConstraints(win, id) {
+  const windowHeader = win.querySelector('.window-header');
+  const windowBody = win.querySelector('.window-body');
+  
+  if (!windowHeader || !windowBody) return;
+  
+  // For confirm windows, only set height constraints once to prevent shrinking
+  if (id === 'confirm-window' && win.dataset.heightSet === 'true') {
+    return;
+  }
+  
+  // Get header height
+  const headerHeight = windowHeader.offsetHeight;
+  
+  // Temporarily allow body to expand to measure natural content height
+  const originalHeight = windowBody.style.height;
+  const originalMaxHeight = windowBody.style.maxHeight;
+  const originalOverflow = windowBody.style.overflowY;
+  
+  windowBody.style.height = 'auto';
+  windowBody.style.maxHeight = 'none';
+  windowBody.style.overflowY = 'visible';
+  
+  // Force reflow and measure
+  windowBody.offsetHeight;
+  const contentHeight = windowBody.scrollHeight;
+  
+  // Calculate total minimum height
+  const totalMinHeight = headerHeight + contentHeight + 20; // Add some padding
+  
+  // Set minimum height on the window
+  win.style.minHeight = `${totalMinHeight}px`;
+  
+  // For confirm windows, also set a fixed height to prevent shrinking
+  if (id === 'confirm-window') {
+    win.style.height = `${totalMinHeight}px`;
+    win.dataset.heightSet = 'true'; // Mark as set to prevent future changes
+  }
+  
+  // Restore original body styles
+  windowBody.style.height = originalHeight;
+  windowBody.style.maxHeight = originalMaxHeight;
+  windowBody.style.overflowY = originalOverflow;
+  
+  console.log(`Set minimum height for ${id}: ${totalMinHeight}px (header: ${headerHeight}px, content: ${contentHeight}px)`);
+}
+
+function setupResizeObserver(win, id) {
+  let isUserResizing = false;
+  
+  // Track when user starts resizing (mouse down on resize handles)
+  win.addEventListener('mousedown', (e) => {
+    // Check if clicking near edges (resize handles)
+    const rect = win.getBoundingClientRect();
+    const edgeThreshold = 10;
+    const isNearRightEdge = e.clientX > rect.right - edgeThreshold;
+    const isNearBottomEdge = e.clientY > rect.bottom - edgeThreshold;
+    const isNearLeftEdge = e.clientX < rect.left + edgeThreshold;
+    const isNearTopEdge = e.clientY < rect.top + edgeThreshold;
+    
+    if (isNearRightEdge || isNearBottomEdge || isNearLeftEdge || isNearTopEdge) {
+      isUserResizing = true;
+      console.log(`User started resizing window ${id}`);
+    }
+  });
+  
+  // Reset resize flag when mouse is released
+  document.addEventListener('mouseup', () => {
+    if (isUserResizing) {
+      isUserResizing = false;
+      console.log(`User stopped resizing window ${id}`);
+      // Mark as interacted when user finishes resizing
+      markWindowAsInteracted(id);
+    }
+  });
+  
+  win.resizeObserver = new ResizeObserver(() => {
+    // Update content-based height constraints whenever window is resized
+    // Skip for confirm windows to prevent shrinking
+    if (id !== 'confirm-window') {
+      setupContentHeightConstraints(win, id);
+    }
+    
+    // Update max dimensions based on current position
+    const currentX = parseInt(win.style.left) || 0;
+    const currentY = parseInt(win.style.top) || 0;
+    
+    // Set max-width based on position
+    const maxAllowedWidth = window.innerWidth - currentX;
+    win.style.maxWidth = `${maxAllowedWidth}px`;
+    
+    // Set max-height based on position and taskbar
+    const taskbarHeight = 40;
+    const maxAllowedHeight = window.innerHeight - currentY - taskbarHeight;
+    win.style.maxHeight = `${maxAllowedHeight}px`;
+  });
+  
+  win.resizeObserver.observe(win);
 }
 
 // Helper function to mark a window as interacted with
