@@ -24,6 +24,11 @@ function openWindow(id) {
   win.style.left = `${clampedX}px`;
   win.style.top = `${clampedY}px`;
 
+  // This code runs only when opening contact window
+  if (id === 'contact-window') {
+    win.style.maxWidth = "450px";
+  }
+
   // Show it for real
   win.style.visibility = "visible";
   win.style.display = "flex";
@@ -770,3 +775,20 @@ document.addEventListener('mouseup', endSelection);
 document.addEventListener('touchstart', handleTouchStart, { passive: false });
 document.addEventListener('touchmove', handleTouchMove, { passive: false });
 document.addEventListener('touchend', endSelection);
+
+function openEmail() {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // On mobile, open default mail client with mailto
+    window.location.href = "mailto:andrew.park6126@gmail.com";
+  } else {
+    // On desktop, open Gmail compose in new tab
+    try {
+      window.open("https://mail.google.com/mail/?view=cm&fs=1&to=andrew.park6126@gmail.com", "_blank");
+    } catch (error) {
+      // fallback to mailto if pop-up blocked or error
+      window.location.href = "mailto:andrew.park6126@gmail.com";
+    }
+  }
+}
