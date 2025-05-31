@@ -15,8 +15,8 @@ function openWindow(id) {
   
   // Set initial size if not already initialized
   if (!window.initializedWindows.has(id)) {
-    const storedWidth = localStorage.getItem(`${id}-width`);
-    const storedHeight = localStorage.getItem(`${id}-height`);
+    const storedWidth = window.localStorage?.getItem(`${id}-width`);
+    const storedHeight = window.localStorage?.getItem(`${id}-height`);
     
     if (storedWidth && storedHeight) {
       // Restore previous size
@@ -26,7 +26,7 @@ function openWindow(id) {
     } else {
       // First time opening - set initial size constraints
       if (id === 'about-window') {
-        win.style.maxWidth = "870px";
+        win.style.maxWidth = "800px";
       } else if (id === 'contact-window' || id === 'projects-window' || 
                  id === 'education-window' || id === 'experience-window' || 
                  id === 'technologies-window') {
@@ -41,6 +41,9 @@ function openWindow(id) {
     window.initializedWindows.add(id);
   }
   
+  // Force a reflow to get accurate dimensions
+  win.offsetHeight;
+  
   // Get actual dimensions after sizing
   const winWidth = win.offsetWidth;
   const winHeight = win.offsetHeight;
@@ -49,13 +52,31 @@ function openWindow(id) {
   const maxX = Math.max(0, window.innerWidth - winWidth);
   const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
   
-  // Get current or default position
-  const currentLeft = parseInt(win.style.left) || Math.max(0, (window.innerWidth - winWidth) / 2);
-  const currentTop = parseInt(win.style.top) || Math.max(0, (window.innerHeight - winHeight) / 2);
+  // Check if window has stored position
+  const storedLeft = window.localStorage?.getItem(`${id}-left`);
+  const storedTop = window.localStorage?.getItem(`${id}-top`);
+  
+  let targetX, targetY;
+  
+  if (storedLeft && storedTop) {
+    // Use stored position if available
+    targetX = parseInt(storedLeft);
+    targetY = parseInt(storedTop);
+  } else {
+    // Position window around the center with some randomness (first time only)
+    const centerX = (window.innerWidth - winWidth) / 2;
+    const centerY = (window.innerHeight - winHeight) / 2;
+    
+    const offsetX = (Math.random() - 0.5) * 200; // -100 to +100px
+    const offsetY = (Math.random() - 0.5) * 200; // -100 to +100px
+    
+    targetX = Math.floor(centerX + offsetX);
+    targetY = Math.floor(centerY + offsetY);
+  }
   
   // Clamp position to screen bounds
-  const clampedX = Math.max(0, Math.min(currentLeft, maxX));
-  const clampedY = Math.max(0, Math.min(currentTop, maxY));
+  const clampedX = Math.max(0, Math.min(targetX, maxX));
+  const clampedY = Math.max(0, Math.min(targetY, maxY));
   
   win.style.left = `${clampedX}px`;
   win.style.top = `${clampedY}px`;
@@ -82,10 +103,25 @@ function openWindow(id) {
   }
 }
 
+// Modified closeWindow function to save position
 function closeWindow(id) {
   const win = document.getElementById(id);
+  
+  // Save current position before closing
+  if (window.localStorage) {
+    const left = win.style.left;
+    const top = win.style.top;
+    
+    if (left && top) {
+      window.localStorage.setItem(`${id}-left`, left);
+      window.localStorage.setItem(`${id}-top`, top);
+    }
+  }
+  
   win.style.display = "none";
 }
+
+
 
 function bringToFront(win) {
   const allWindows = document.querySelectorAll(".window");
@@ -156,10 +192,18 @@ function makeDraggable(win) {
     e.preventDefault();
   }
 
+  // You'll also want to update your drag end function to save position
   function endDrag() {
     if (isDragging) {
       isDragging = false;
       header.style.cursor = "move";
+      
+      // Save position after dragging
+      const windowId = win.id;
+      if (windowId && window.localStorage) {
+        window.localStorage.setItem(`${windowId}-left`, win.style.left);
+        window.localStorage.setItem(`${windowId}-top`, win.style.top);
+      }
     }
   }
 
