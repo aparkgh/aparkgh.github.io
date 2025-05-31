@@ -4,6 +4,9 @@ function openWindow(id) {
   const win = document.getElementById(id);
   if (!win) return; // Safety check
   
+  if (win.style.display === "block" || win.style.display === "flex") {
+    return; // Window is already open, don't open again
+  }
   // Initialize tracking variables if not present
   if (!window.windowStates) {
     window.windowStates = {};
