@@ -1,44 +1,56 @@
 // Window management
-// Window management
 function openWindow(id) {
   const win = document.getElementById(id);
   if (!win) return; // Safety check
   
   // Initialize tracking variables if not present
-  if (!window.initializedWindows) {
-    window.initializedWindows = new Set();
+  if (!window.userMovedWindows) {
+    window.userMovedWindows = new Set();
   }
   
   // Show window initially
   win.style.display = "block";
   win.style.visibility = "visible";
   
-  // Set initial size if not already initialized
-  if (!window.initializedWindows.has(id)) {
-    const storedWidth = window.localStorage?.getItem(`${id}-width`);
-    const storedHeight = window.localStorage?.getItem(`${id}-height`);
+  // Set window size
+  if (window.userMovedWindows.has(id)) {
+    // User has moved/resized before - restore saved size
+    const storedWidth = localStorage.getItem(`${id}-width`);
+    const storedHeight = localStorage.getItem(`${id}-height`);
     
     if (storedWidth && storedHeight) {
-      // Restore previous size
       win.style.width = storedWidth;
       win.style.height = storedHeight;
       win.style.maxWidth = "none";
+    }
+  } else {
+    // User hasn't moved/resized - use random size within constraints
+    let minWidth, maxWidth;
+    
+    if (id === 'about-window') {
+      minWidth = 400;
+      maxWidth = 800;
+    } else if (id === 'contact-window' || id === 'projects-window' || 
+               id === 'education-window' || id === 'experience-window' || 
+               id === 'technologies-window') {
+      minWidth = 350;
+      maxWidth = 650;
     } else {
-      // First time opening - set initial size constraints
-      if (id === 'about-window') {
-        win.style.maxWidth = "800px";
-      } else if (id === 'contact-window' || id === 'projects-window' || 
-                 id === 'education-window' || id === 'experience-window' || 
-                 id === 'technologies-window') {
-        win.style.maxWidth = "650px";
-      }
-      // Set default width if no constraint
-      if (!win.style.width || win.style.width === 'auto') {
-        win.style.width = `${Math.min(window.innerWidth / 2, 600)}px`;
-      }
+      minWidth = 300;
+      maxWidth = 600;
     }
     
-    window.initializedWindows.add(id);
+    // Ensure we don't exceed screen size
+    maxWidth = Math.min(maxWidth, window.innerWidth * 0.9);
+    minWidth = Math.min(minWidth, maxWidth);
+    
+    // Random width within constraints
+    const randomWidth = minWidth + Math.random() * (maxWidth - minWidth);
+    win.style.width = `${Math.floor(randomWidth)}px`;
+    
+    // Remove any height constraints to let content determine height
+    win.style.height = 'auto';
+    win.style.maxWidth = "none";
   }
   
   // Force a reflow to get accurate dimensions
@@ -52,23 +64,29 @@ function openWindow(id) {
   const maxX = Math.max(0, window.innerWidth - winWidth);
   const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
   
-  // Check if window has stored position
-  const storedLeft = window.localStorage?.getItem(`${id}-left`);
-  const storedTop = window.localStorage?.getItem(`${id}-top`);
-  
   let targetX, targetY;
   
-  if (storedLeft && storedTop) {
-    // Use stored position if available
-    targetX = parseInt(storedLeft);
-    targetY = parseInt(storedTop);
+  // Check if user has moved this window AND we have stored position
+  if (window.userMovedWindows.has(id)) {
+    const storedLeft = localStorage.getItem(`${id}-left`);
+    const storedTop = localStorage.getItem(`${id}-top`);
+    
+    if (storedLeft && storedTop) {
+      // Use stored position
+      targetX = parseInt(storedLeft);
+      targetY = parseInt(storedTop);
+    } else {
+      // User moved it before but no stored position - use random
+      targetX = Math.random() * maxX;
+      targetY = Math.random() * maxY;
+    }
   } else {
-    // Position window around the center with some randomness (first time only)
+    // User hasn't moved this window - always use random position
     const centerX = (window.innerWidth - winWidth) / 2;
     const centerY = (window.innerHeight - winHeight) / 2;
     
-    const offsetX = (Math.random() - 0.5) * 200; // -100 to +100px
-    const offsetY = (Math.random() - 0.5) * 200; // -100 to +100px
+    const offsetX = (Math.random() - 0.5) * Math.min(1000, maxX); // Adjust range based on screen size
+    const offsetY = (Math.random() - 0.5) * Math.min(400, maxY);
     
     targetX = Math.floor(centerX + offsetX);
     targetY = Math.floor(centerY + offsetY);
@@ -87,11 +105,23 @@ function openWindow(id) {
   
   // Add resize observer for future resizing detection
   if (!win.resizeObserver) {
+    let initialResize = true; // Flag to ignore the first resize event
+    
     win.resizeObserver = new ResizeObserver(() => {
+      if (initialResize) {
+        // Skip the first resize event which happens automatically
+        initialResize = false;
+        return;
+      }
+      
+      // Only mark as user-resized if this is a real user interaction
       if (!win.hasBeenResized) {
         win.hasBeenResized = true;
         win.style.maxWidth = "none";
-        // Keep observer for potential future use rather than disconnecting
+        // Mark as user-interacted when actually resized by user
+        window.userMovedWindows.add(id);
+        // Save the new size when user resizes
+        saveWindowPosition(id);
       }
     });
     win.resizeObserver.observe(win);
@@ -103,25 +133,44 @@ function openWindow(id) {
   }
 }
 
-// Modified closeWindow function to save position
+function saveWindowPosition(windowId) {
+  const win = document.getElementById(windowId);
+  if (win && window.userMovedWindows && window.userMovedWindows.has(windowId)) {
+    // Only save if the window has been moved/resized by user
+    localStorage.setItem(`${windowId}-left`, win.style.left);
+    localStorage.setItem(`${windowId}-top`, win.style.top);
+    localStorage.setItem(`${windowId}-width`, win.style.width);
+    localStorage.setItem(`${windowId}-height`, win.style.height);
+  }
+}
+
+// Helper function to clear stored positions for testing
+function clearWindowMemory(windowId) {
+  if (window.userMovedWindows) {
+    window.userMovedWindows.delete(windowId);
+  }
+  localStorage.removeItem(`${windowId}-left`);
+  localStorage.removeItem(`${windowId}-top`);
+  localStorage.removeItem(`${windowId}-width`);
+  localStorage.removeItem(`${windowId}-height`);
+}
+
 function closeWindow(id) {
   const win = document.getElementById(id);
   
-  // Save current position before closing
-  if (window.localStorage) {
-    const left = win.style.left;
-    const top = win.style.top;
-    
-    if (left && top) {
-      window.localStorage.setItem(`${id}-left`, left);
-      window.localStorage.setItem(`${id}-top`, top);
-    }
+  // Only save position if user has actually moved/resized this window
+  if (window.userMovedWindows && window.userMovedWindows.has(id)) {
+    saveWindowPosition(id);
+  } else {
+    // User hasn't moved/resized - clear any stored positions to ensure random spawn
+    localStorage.removeItem(`${id}-left`);
+    localStorage.removeItem(`${id}-top`);
+    localStorage.removeItem(`${id}-width`);
+    localStorage.removeItem(`${id}-height`);
   }
   
   win.style.display = "none";
 }
-
-
 
 function bringToFront(win) {
   const allWindows = document.querySelectorAll(".window");
@@ -133,7 +182,6 @@ function bringToFront(win) {
   win.style.zIndex = maxZ + 1;
 }
 
-// Make windows draggable
 function makeDraggable(win) {
   const header = win.querySelector(".window-header");
   let isDragging = false;
@@ -170,19 +218,13 @@ function makeDraggable(win) {
     currentX = coords.x - initialX;
     currentY = coords.y - initialY;
 
-    // clamps window to desktop so they stop opening outside of the viewport
+    // Clamps window to desktop so they stay within viewport
     const winWidth = win.offsetWidth || 400;
     const winHeight = win.offsetHeight || 300;
     const taskbarHeight = 40;
 
     const maxX = window.innerWidth - winWidth;
     const maxY = window.innerHeight - winHeight - taskbarHeight;
-
-    const randomX = Math.random() * Math.max(0, maxX);
-    const randomY = Math.random() * Math.max(0, maxY);
-
-    win.style.left = `${randomX}px`;
-    win.style.top = `${randomY}px`;
 
     currentX = Math.max(0, Math.min(currentX, maxX));
     currentY = Math.max(0, Math.min(currentY, maxY));
@@ -192,17 +234,19 @@ function makeDraggable(win) {
     e.preventDefault();
   }
 
-  // You'll also want to update your drag end function to save position
   function endDrag() {
     if (isDragging) {
       isDragging = false;
       header.style.cursor = "move";
       
-      // Save position after dragging
+      // Mark this window as moved by user and save position
       const windowId = win.id;
-      if (windowId && window.localStorage) {
-        window.localStorage.setItem(`${windowId}-left`, win.style.left);
-        window.localStorage.setItem(`${windowId}-top`, win.style.top);
+      if (windowId) {
+        if (!window.userMovedWindows) {
+          window.userMovedWindows = new Set();
+        }
+        window.userMovedWindows.add(windowId);
+        saveWindowPosition(windowId);
       }
     }
   }
@@ -222,18 +266,30 @@ function makeDraggable(win) {
   win.addEventListener("touchstart", () => bringToFront(win));
 }
 
-
-// Initialize draggable windows
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".window").forEach((win) => {
     makeDraggable(win);
-    // Random positioning for variety
-    const randomX = Math.random() * (window.innerWidth - 400);
-    const randomY = Math.random() * (window.innerHeight - 300) + 50;
-    win.style.left = randomX + "px";
-    win.style.top = randomY + "px";
   });
 });
+
+// Handle window resize
+window.addEventListener("resize", function () {
+  const windows = document.querySelectorAll(".window");
+  windows.forEach((win) => {
+    const rect = win.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      win.style.left = window.innerWidth - win.offsetWidth + "px";
+    }
+    if (rect.bottom > window.innerHeight - 40) {
+      win.style.top = window.innerHeight - win.offsetHeight - 40 + "px";
+    }
+  });
+});
+
+
+
+
+
 
 // Start menu functionality
 function toggleStartMenu() {
@@ -282,19 +338,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-// Handle window resize
-window.addEventListener("resize", function () {
-  const windows = document.querySelectorAll(".window");
-  windows.forEach((win) => {
-    const rect = win.getBoundingClientRect();
-    if (rect.right > window.innerWidth) {
-      win.style.left = window.innerWidth - win.offsetWidth + "px";
-    }
-    if (rect.bottom > window.innerHeight - 40) {
-      win.style.top = window.innerHeight - win.offsetHeight - 40 + "px";
-    }
-  });
-});
+
 
 // Click easter egg (if you found this by scraping my script.js then it doesn't count)
 document.addEventListener("DOMContentLoaded", function () {
