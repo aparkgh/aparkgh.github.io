@@ -157,8 +157,17 @@ function setupContentHeightConstraints(win, id) {
   // 2. OR we don't have a minHeight set yet
   const currentMinHeight = parseInt(win.style.minHeight) || 0;
   
-  // Set minimum height on the window
-  win.style.minHeight = `${totalMinHeight}px`;
+  if (currentWindowHeight < requiredMinHeight || currentMinHeight === 0) {
+    // User made window too small or no minimum set - set the minimum
+    win.style.minHeight = `${requiredMinHeight}px`;
+    console.log(`Set minimum height for ${id}: ${requiredMinHeight}px (content requires this)`);
+  } else if (requiredMinHeight < currentMinHeight && currentWindowHeight > requiredMinHeight) {
+    // Content got smaller and current window is larger than required - allow smaller minimum
+    win.style.minHeight = `${requiredMinHeight}px`;
+    console.log(`Reduced minimum height for ${id}: ${requiredMinHeight}px (content is smaller)`);
+    // But don't force the window to shrink - let user decide
+  }
+  // If current window is larger than required minimum, don't change anything
   
   // For confirm windows, also set a fixed height to prevent shrinking
   if (id === 'confirm-window') {
