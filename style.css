@@ -8,12 +8,12 @@
 
 @font-face {
     font-family: "Free Pixel";
-    src: url("./assets/FreePixel.ttf") format('woff');
+    src: url("./assets/FreePixel.ttf") format('truetype');
 }
 
 @font-face {
     font-family: "Franklin Gothic";
-    src: url("./assets/FranklinGothic.ttf") format('woff');
+    src: url("./assets/FranklinGothic.ttf") format('truetype');
 }
 
 @font-face {
