@@ -171,7 +171,7 @@ html {
     color: white;
     z-index: 2000;
     border: 2px outset #fff;
-    padding: 1px 0;
+    /* padding: 1px 0; */
 }
 
 #start-button {
@@ -183,7 +183,7 @@ html {
     align-items: center;
     font-size: 1rem;
     padding: 3px;
-    margin: 1px 0;
+    /* margin: 1px 0; */
     user-select: none;
 }
 
