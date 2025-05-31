@@ -523,14 +523,21 @@ document.addEventListener("DOMContentLoaded", function () {
   let userInput = [];
 
   document.addEventListener("keydown", function (e) {
-    userInput.push(e.key);
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key; // lowercase letters, keep arrows
+
+    userInput.push(key);
     if (userInput.length > konamiCode.length) {
       userInput.shift(); // keep only the last N keys
     }
 
-    if (userInput.join("") === konamiCode.join("")) {
+    const normalizedKonami = konamiCode.map(k =>
+      k.length === 1 ? k.toLowerCase() : k
+    );
+
+    if (userInput.join("") === normalizedKonami.join("")) {
       alert(
-        "🎉 ...Oh? You found the secret desktop message!\n\nThanks for exploring my portfolio!"
+        "✨ EASTER EGG DISCOVERED ✨\n\n\n" +
+        "A secret has been revealed somewhere..."
       );
       
       // Reveal the TEST icon after the secret is found
@@ -540,6 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
 
 function updateClock() {
   const now = new Date();
@@ -577,6 +585,7 @@ const icons = [
     "Zerowire",
     () => {
       pendingLink = "https://github.com/aparkgh/zerowire";
+      document.getElementById('confirm-window').classList.remove('rainbow-window');
       openWindow("confirm-window");
     },
     "assets/icons/zerowire.png",
@@ -608,6 +617,7 @@ const icons = [
     "Snake",
     () => {
       pendingLink = "https://github.com/aparkgh/snake";
+      document.getElementById('confirm-window').classList.remove('rainbow-window');
       openWindow("confirm-window");
     },
     "assets/icons/snake.png",
@@ -618,6 +628,7 @@ const icons = [
     "Folder Nuker",
     () => {
       pendingLink = "https://github.com/aparkgh/foldernuker";
+      document.getElementById('confirm-window').classList.remove('rainbow-window');
       openWindow("confirm-window");
     },
     "assets/icons/foldernuker.png",
@@ -628,6 +639,7 @@ const icons = [
     "Day Counter",
     () => {
       pendingLink = "https://github.com/aparkgh/daycounter";
+      document.getElementById('confirm-window').classList.remove('rainbow-window');
       openWindow("confirm-window");
     },
     "assets/icons/daycounter.png",
@@ -638,6 +650,7 @@ const icons = [
     "Spotify",
     () => {
       pendingLink = "https://open.spotify.com/user/229ll5brg0pwf57snpkikhd0r";
+      document.getElementById('confirm-window').classList.remove('rainbow-window');
       openWindow("confirm-window");
     },
     "assets/icons/spotify.png",
@@ -648,12 +661,14 @@ const icons = [
     "TEST",
     () => {
       pendingLink = "https://aparkgh.github.io/assets/buttoncatch";
+      // Add rainbow class before opening window
+      document.getElementById('confirm-window').classList.add('rainbow-window');
       openWindow("confirm-window");
     },
     "assets/icons/windows.png",
     { x: 0, y: 0 },
     { top: 500, right: 1000 },
-    true // Set hidden to true initially
+    true
   ),
 ];
 

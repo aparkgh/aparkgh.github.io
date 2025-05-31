@@ -379,3 +379,149 @@ html {
         transform: translateX(-50%);
     }
 }
+
+/* Synchronized RGB Wave Effect for Rainbow Window */
+
+/* Single keyframe animation that all elements will share */
+@keyframes synced-rgb-wave {
+  0% { 
+    background-position: 0% 50%;
+    filter: hue-rotate(0deg) brightness(1.1);
+  }
+  25% {
+    background-position: 75% 50%;
+    filter: hue-rotate(90deg) brightness(1.2);
+  }
+  50% {
+    background-position: 150% 50%;
+    filter: hue-rotate(180deg) brightness(1.3);
+  }
+  75% {
+    background-position: 225% 50%;
+    filter: hue-rotate(270deg) brightness(1.2);
+  }
+  100% { 
+    background-position: 300% 50%;
+    filter: hue-rotate(360deg) brightness(1.1);
+  }
+}
+
+/* Header uses the shared animation */
+.rainbow-window .window-header {
+  background: linear-gradient(90deg, 
+    hsl(0, 100%, 50%),    /* Red */
+    hsl(60, 100%, 50%),   /* Yellow */
+    hsl(120, 100%, 50%),  /* Green */
+    hsl(180, 100%, 50%),  /* Cyan */
+    hsl(240, 100%, 50%),  /* Blue */
+    hsl(300, 100%, 50%),  /* Magenta */
+    hsl(360, 100%, 50%)   /* Red again */
+  );
+  background-size: 300% 100%;
+  animation: synced-rgb-wave 4s linear infinite;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  font-weight: bold;
+}
+
+/* Border uses the same shared animation */
+.rainbow-window {
+  border: 3px solid;
+  border-image: linear-gradient(90deg,
+    hsl(0, 100%, 50%),
+    hsl(60, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(180, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(300, 100%, 50%),
+    hsl(360, 100%, 50%)
+  ) 1;
+  animation: synced-rgb-wave 4s linear infinite;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Buttons also use the shared animation with a gradient background */
+.rainbow-window .window-buttons {
+  background: linear-gradient(90deg, 
+    hsl(240, 100%, 60%), 
+    hsl(300, 100%, 60%),
+    hsl(0, 100%, 60%),
+    hsl(60, 100%, 60%),
+    hsl(120, 100%, 60%),
+    hsl(180, 100%, 60%),
+    hsl(240, 100%, 60%)
+  );
+  background-size: 300% 100%;
+  animation: synced-rgb-wave 4s linear infinite;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rainbow-window .window-buttons:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+  /* Keep the same animation running on hover */
+}
+
+/* Optional: Synchronized glow effect */
+.rainbow-window::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  background: linear-gradient(90deg,
+    hsl(0, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(0, 100%, 50%)
+  );
+  background-size: 300% 100%;
+  border-radius: inherit;
+  z-index: -1;
+  animation: synced-rgb-wave 4s linear infinite;
+  opacity: 0.7;
+  filter: blur(8px);
+}
+
+/* Alternative: Ultra-smooth synchronized version */
+.rainbow-window.ultra-smooth .window-header,
+.rainbow-window.ultra-smooth,
+.rainbow-window.ultra-smooth .window-buttons,
+.rainbow-window.ultra-smooth::before {
+  background: linear-gradient(90deg, 
+    #ff0000, #ff4000, #ff8000, #ffbf00, #ffff00,
+    #bfff00, #80ff00, #40ff00, #00ff00, #00ff40,
+    #00ff80, #00ffbf, #00ffff, #00bfff, #0080ff,
+    #0040ff, #0000ff, #4000ff, #8000ff, #bf00ff,
+    #ff00ff, #ff00bf, #ff0080, #ff0040, #ff0000
+  );
+  background-size: 500% 100%;
+  animation: ultra-smooth-synced-wave 6s linear infinite;
+}
+
+@keyframes ultra-smooth-synced-wave {
+  0% { 
+    background-position: 0% 50%; 
+    filter: hue-rotate(0deg) brightness(1.1);
+  }
+  25% {
+    background-position: 125% 50%;
+    filter: hue-rotate(90deg) brightness(1.2);
+  }
+  50% {
+    background-position: 250% 50%;
+    filter: hue-rotate(180deg) brightness(1.3);
+  }
+  75% {
+    background-position: 375% 50%;
+    filter: hue-rotate(270deg) brightness(1.2);
+  }
+  100% { 
+    background-position: 500% 50%; 
+    filter: hue-rotate(360deg) brightness(1.1);
+  }
+}
