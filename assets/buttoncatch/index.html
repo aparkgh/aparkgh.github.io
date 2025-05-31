@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Catch Me!</title>
+<script src="script.js" defer></script>
+<link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="style.css"></noscript>
+<link rel="icon" type="image/x-icon" href="../icons/scooter.ico">
+</head>
+<body>
+
+<!-- Background particles -->
+<div id="particles"></div>
+
+<!-- UI Panel -->
+<div class="ui-panel">
+  <div class="score">Score: <span id="score">0</span></div>
+  <div class="timer">Time: <span id="timer">60</span>s</div>
+  <div class="difficulty">Level: <span id="level">Easy</span></div>
+  <div class="controls">
+    <button class="control-btn" onclick="changeDifficulty()">Change Level</button>
+    <button class="control-btn" onclick="pauseGame()">Pause</button>
+    <button class="control-btn" onclick="restartGame()">Restart</button>
+  </div>
+</div>
+
+<!-- Main game button -->
+<button id="run-button">Catch me if you can!</button>
+
+<!-- Combo indicator -->
+<div class="combo" id="combo"></div>
+
+<!-- Game over screen -->
+<div class="game-over" id="game-over">
+  <h1>Game Over!</h1>
+  <p id="final-score">Your final score: 0</p>
+  <p id="performance"></p>
+  <button class="restart-btn" onclick="restartGame()">Play Again</button>
+</div>
+</body>
+</html>

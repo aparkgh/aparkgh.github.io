@@ -647,7 +647,7 @@ const icons = [
   new Icon(
     "TEST",
     () => {
-      pendingLink = "https://aparkgh.github.io/assets";
+      pendingLink = "https://aparkgh.github.io/assets/buttoncatch";
       openWindow("confirm-window");
     },
     "assets/icons/windows.png",
