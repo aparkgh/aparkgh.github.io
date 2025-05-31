@@ -704,21 +704,22 @@ const icons = [
     () => openWindow("technologies-window"),
     "assets/icons/technologies.png",
     { x: 0, y: 0 },
-    { top: 80, right: 100 }
+    { top: 80, right: 110 }
   ),
   new Icon(
     "Experience",
     () => openWindow("experience-window"),
     "assets/icons/experience.png",
     { x: 0, y: 0 },
-    { top: 200, right: 250 }
+    { top: 150, right: 270 }
   ),
   new Icon(
     "Education",
     () => openWindow("education-window"),
     "assets/icons/education.png",
     { x: 0, y: 0 },
-    { top: 300, left: 100 }
+    { top: 300, left: 140 }
+    //
   ),
   new Icon(
     "Snake",
@@ -751,7 +752,7 @@ const icons = [
     },
     "assets/icons/daycounter.png",
     { x: 0, y: 0 },
-    { top: 350, right: 150 }
+    { top: 280, right: 200 }
   ),
   new Icon(
     "Spotify",
@@ -762,7 +763,19 @@ const icons = [
     },
     "assets/icons/spotify.png",
     { x: 0, y: 0 },
-    { top: 450, right: 320 }
+    { top: 350, right: 80 }
+  ),
+  new Icon(
+    "Monkeytype",
+    () => {
+      pendingLink = "https://monkeytype.com/profile/aparkk";
+      document.getElementById('confirm-window').classList.remove('rainbow-window');
+      openWindow("confirm-window");
+    },
+    "assets/icons/keyboard.png",
+    { x: 0, y: 0 },
+    { top: 370, right: 360 }
+    // 310 430
   ),
   new Icon(
     "W95TEST",
