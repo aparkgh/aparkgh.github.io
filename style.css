@@ -360,7 +360,7 @@ html {
 
 .scrolling-track {
     display: inline-flex;
-    animation: scroll-left 20s linear infinite;
+    animation: scroll-left 40s linear infinite;
 }
 
 .scrolling-track span {

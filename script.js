@@ -7,6 +7,7 @@ function openWindow(id) {
   if (win.style.display === "block" || win.style.display === "flex") {
     return; // Window is already open, don't open again
   }
+
   // Initialize tracking variables if not present
   if (!window.windowStates) {
     window.windowStates = {};
@@ -137,29 +138,34 @@ function openWindow(id) {
       }
     });
     
-    win.resizeObserver = new ResizeObserver(() => {
-      if (initialResize) {
-        initialResize = false;
-        lastWidth = win.offsetWidth;
-        lastHeight = win.offsetHeight;
-        return;
-      }
-      
-      const currentWidth = win.offsetWidth;
-      const currentHeight = win.offsetHeight;
-      
-      // Only mark as interacted if there was a significant size change AND user was actively resizing
-      const widthChanged = Math.abs(currentWidth - lastWidth) > 1;
-      const heightChanged = Math.abs(currentHeight - lastHeight) > 1;
-      
-      if ((widthChanged || heightChanged) && isUserResizing) {
-        console.log(`Window ${id} has been RESIZED by user - marking as interacted`);
-        markWindowAsInteracted(id);
-      }
-      
-      lastWidth = currentWidth;
-      lastHeight = currentHeight;
-    });
+win.resizeObserver = new ResizeObserver(() => {
+  if (initialResize) {
+    initialResize = false;
+    lastWidth = win.offsetWidth;
+    lastHeight = win.offsetHeight;
+    return;
+  }
+  
+  const currentWidth = win.offsetWidth;
+  const currentHeight = win.offsetHeight;
+  let currentX = parseInt(win.style.left) || 0;
+  
+  // Set CSS max-width to prevent browser from allowing resize beyond bounds
+  const maxAllowedWidth = window.innerWidth - currentX;
+  win.style.maxWidth = `${maxAllowedWidth}px`;
+  
+  // Rest of your existing code...
+  const widthChanged = Math.abs(currentWidth - lastWidth) > 1;
+  const heightChanged = Math.abs(currentHeight - lastHeight) > 1;
+  
+  if ((widthChanged || heightChanged) && isUserResizing) {
+    console.log(`Window ${id} has been RESIZED by user - marking as interacted`);
+    markWindowAsInteracted(id);
+  }
+  
+  lastWidth = win.offsetWidth;
+  lastHeight = win.offsetHeight;
+});
     win.resizeObserver.observe(win);
   }
   
@@ -363,8 +369,8 @@ function makeDraggable(win) {
     }
 
     // Clamps window to desktop so they stay within viewport
-    const winWidth = win.offsetWidth || 400;
-    const winHeight = win.offsetHeight || 300;
+    const winWidth = win.offsetWidth;
+    const winHeight = win.offsetHeight;
     const taskbarHeight = 40;
 
     const maxX = window.innerWidth - winWidth;
@@ -452,7 +458,28 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("keydown", handleEscapeKey);
 });
 
-
+window.addEventListener('resize', () => {
+  // Re-clamp all open windows when viewport resizes
+  document.querySelectorAll('[id$="-window"]').forEach(window => {
+    if (window.style.display === 'block' || window.style.display === 'flex') {
+      const winWidth = window.offsetWidth;
+      const winHeight = window.offsetHeight;
+      const taskbarHeight = 40;
+      
+      let currentX = parseInt(window.style.left) || 0;
+      let currentY = parseInt(window.style.top) || 0;
+      
+      const maxX = window.innerWidth - winWidth;
+      const maxY = window.innerHeight - winHeight - taskbarHeight;
+      
+      currentX = Math.max(0, Math.min(currentX, maxX));
+      currentY = Math.max(0, Math.min(currentY, maxY));
+      
+      window.style.left = currentX + "px";
+      window.style.top = currentY + "px";
+    }
+  });
+});
 
 
 
