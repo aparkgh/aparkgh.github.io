@@ -1,51 +1,85 @@
 // Window management
+// Window management
 function openWindow(id) {
   const win = document.getElementById(id);
-  win.style.display = "flex";
-  win.style.width = `${window.innerWidth / 2}px`;
-
-  // Temporarily show it to get size
-  win.style.visibility = "hidden";
+  if (!win) return; // Safety check
+  
+  // Initialize tracking variables if not present
+  if (!window.initializedWindows) {
+    window.initializedWindows = new Set();
+  }
+  
+  // Show window initially
   win.style.display = "block";
-
-  const winWidth = win.offsetWidth;
-  const winHeight = win.offsetHeight;
-
-  const maxX = window.innerWidth - winWidth;
-  const maxY = window.innerHeight - winHeight - 40; // Leave room for taskbar
-
-  // Clamp current position or re-center
-  const currentLeft = parseInt(win.style.left) || 0;
-  const currentTop = parseInt(win.style.top) || 0;
-
-  const clampedX = Math.max(0, Math.min(currentLeft, maxX));
-  const clampedY = Math.max(0, Math.min(currentTop, maxY));
-
-  win.style.left = `${clampedX}px`;
-  win.style.top = `${clampedY}px`;
-
-  // This code runs only when initialising opening a window
-  const initializedWindows = new Set();
-
-  if (!win.hasBeenInitialized) {
-    if (id === 'about-window') {
-      win.style.width = "870px";  // Changed from maxWidth to width
-    } else if (id === 'contact-window') {
-      win.style.width = "450px";  // Changed from maxWidth to width
-    } else if (id === 'projects-window') {
-      win.style.width = "450px";  // Changed from maxWidth to width
-    } else if (id === 'education-window') {
-      win.style.width = "450px";  // Changed from maxWidth to width
+  win.style.visibility = "visible";
+  
+  // Set initial size if not already initialized
+  if (!window.initializedWindows.has(id)) {
+    const storedWidth = localStorage.getItem(`${id}-width`);
+    const storedHeight = localStorage.getItem(`${id}-height`);
+    
+    if (storedWidth && storedHeight) {
+      // Restore previous size
+      win.style.width = storedWidth;
+      win.style.height = storedHeight;
+      win.style.maxWidth = "none";
+    } else {
+      // First time opening - set initial size constraints
+      if (id === 'about-window') {
+        win.style.maxWidth = "870px";
+      } else if (id === 'contact-window' || id === 'projects-window' || 
+                 id === 'education-window' || id === 'experience-window' || 
+                 id === 'technologies-window') {
+        win.style.maxWidth = "650px";
+      }
+      // Set default width if no constraint
+      if (!win.style.width || win.style.width === 'auto') {
+        win.style.width = `${Math.min(window.innerWidth / 2, 600)}px`;
+      }
     }
     
-    win.hasBeenInitialized = true;
+    window.initializedWindows.add(id);
   }
-
-  // Show it for real
-  win.style.visibility = "visible";
+  
+  // Get actual dimensions after sizing
+  const winWidth = win.offsetWidth;
+  const winHeight = win.offsetHeight;
+  
+  // Calculate position constraints
+  const maxX = Math.max(0, window.innerWidth - winWidth);
+  const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
+  
+  // Get current or default position
+  const currentLeft = parseInt(win.style.left) || Math.max(0, (window.innerWidth - winWidth) / 2);
+  const currentTop = parseInt(win.style.top) || Math.max(0, (window.innerHeight - winHeight) / 2);
+  
+  // Clamp position to screen bounds
+  const clampedX = Math.max(0, Math.min(currentLeft, maxX));
+  const clampedY = Math.max(0, Math.min(currentTop, maxY));
+  
+  win.style.left = `${clampedX}px`;
+  win.style.top = `${clampedY}px`;
+  
+  // Set final display properties
   win.style.display = "flex";
-
-  bringToFront(win);
+  win.style.visibility = "visible";
+  
+  // Add resize observer for future resizing detection
+  if (!win.resizeObserver) {
+    win.resizeObserver = new ResizeObserver(() => {
+      if (!win.hasBeenResized) {
+        win.hasBeenResized = true;
+        win.style.maxWidth = "none";
+        // Keep observer for potential future use rather than disconnecting
+      }
+    });
+    win.resizeObserver.observe(win);
+  }
+  
+  // Bring window to front
+  if (typeof bringToFront === 'function') {
+    bringToFront(win);
+  }
 }
 
 function closeWindow(id) {
