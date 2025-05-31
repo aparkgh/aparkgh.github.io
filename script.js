@@ -1,30 +1,40 @@
-// Window management
+// Window management with interaction tracking
 function openWindow(id) {
   const win = document.getElementById(id);
   if (!win) return; // Safety check
   
   // Initialize tracking variables if not present
-  if (!window.userMovedWindows) {
-    window.userMovedWindows = new Set();
+  if (!window.userInteractedWindows) {
+    window.userInteractedWindows = new Set();
   }
   
   // Show window initially
   win.style.display = "block";
   win.style.visibility = "visible";
   
+  // Check if this window has been interacted with before
+  const hasBeenInteracted = window.userInteractedWindows.has(id);
+  
   // Set window size
-  if (window.userMovedWindows.has(id)) {
-    // User has moved/resized before - restore saved size
-    const storedWidth = localStorage.getItem(`${id}-width`);
-    const storedHeight = localStorage.getItem(`${id}-height`);
+  if (hasBeenInteracted) {
+    // Window has been interacted with - restore saved size and position
+    const storedWidth = getStoredValue(`${id}-width`);
+    const storedHeight = getStoredValue(`${id}-height`);
+    const storedLeft = getStoredValue(`${id}-left`);
+    const storedTop = getStoredValue(`${id}-top`);
     
     if (storedWidth && storedHeight) {
       win.style.width = storedWidth;
       win.style.height = storedHeight;
       win.style.maxWidth = "none";
     }
+    
+    if (storedLeft && storedTop) {
+      win.style.left = storedLeft;
+      win.style.top = storedTop;
+    }
   } else {
-    // User hasn't moved/resized - use random size within constraints
+    // Window hasn't been interacted with - use random size and position
     let minWidth, maxWidth;
     
     if (id === 'about-window') {
@@ -44,60 +54,41 @@ function openWindow(id) {
     maxWidth = Math.min(maxWidth, window.innerWidth * 0.9);
     minWidth = Math.min(minWidth, maxWidth);
     
-    // Random width within constraints
+    // Set random width within constraints
     const randomWidth = minWidth + Math.random() * (maxWidth - minWidth);
     win.style.width = `${Math.floor(randomWidth)}px`;
     
     // Remove any height constraints to let content determine height
     win.style.height = 'auto';
     win.style.maxWidth = "none";
-  }
-  
-  // Force a reflow to get accurate dimensions
-  win.offsetHeight;
-  
-  // Get actual dimensions after sizing
-  const winWidth = win.offsetWidth;
-  const winHeight = win.offsetHeight;
-  
-  // Calculate position constraints
-  const maxX = Math.max(0, window.innerWidth - winWidth);
-  const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
-  
-  let targetX, targetY;
-  
-  // Check if user has moved this window AND we have stored position
-  if (window.userMovedWindows.has(id)) {
-    const storedLeft = localStorage.getItem(`${id}-left`);
-    const storedTop = localStorage.getItem(`${id}-top`);
     
-    if (storedLeft && storedTop) {
-      // Use stored position
-      targetX = parseInt(storedLeft);
-      targetY = parseInt(storedTop);
-    } else {
-      // User moved it before but no stored position - use random
-      targetX = Math.random() * maxX;
-      targetY = Math.random() * maxY;
-    }
-  } else {
-    // User hasn't moved this window - always use random position
+    // Force a reflow to get accurate dimensions
+    win.offsetHeight;
+    
+    // Get actual dimensions after sizing
+    const winWidth = win.offsetWidth;
+    const winHeight = win.offsetHeight;
+    
+    // Calculate random position
+    const maxX = Math.max(0, window.innerWidth - winWidth);
+    const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
+    
     const centerX = (window.innerWidth - winWidth) / 2;
     const centerY = (window.innerHeight - winHeight) / 2;
     
-    const offsetX = (Math.random() - 0.5) * Math.min(1000, maxX); // Adjust range based on screen size
+    const offsetX = (Math.random() - 0.5) * Math.min(1000, maxX);
     const offsetY = (Math.random() - 0.5) * Math.min(400, maxY);
     
-    targetX = Math.floor(centerX + offsetX);
-    targetY = Math.floor(centerY + offsetY);
+    const targetX = Math.floor(centerX + offsetX);
+    const targetY = Math.floor(centerY + offsetY);
+    
+    // Clamp position to screen bounds
+    const clampedX = Math.max(0, Math.min(targetX, maxX));
+    const clampedY = Math.max(0, Math.min(targetY, maxY));
+    
+    win.style.left = `${clampedX}px`;
+    win.style.top = `${clampedY}px`;
   }
-  
-  // Clamp position to screen bounds
-  const clampedX = Math.max(0, Math.min(targetX, maxX));
-  const clampedY = Math.max(0, Math.min(targetY, maxY));
-  
-  win.style.left = `${clampedX}px`;
-  win.style.top = `${clampedY}px`;
   
   // Set final display properties
   win.style.display = "flex";
@@ -105,24 +96,16 @@ function openWindow(id) {
   
   // Add resize observer for future resizing detection
   if (!win.resizeObserver) {
-    let initialResize = true; // Flag to ignore the first resize event
+    let initialResize = true;
     
     win.resizeObserver = new ResizeObserver(() => {
       if (initialResize) {
-        // Skip the first resize event which happens automatically
         initialResize = false;
         return;
       }
       
-      // Only mark as user-resized if this is a real user interaction
-      if (!win.hasBeenResized) {
-        win.hasBeenResized = true;
-        win.style.maxWidth = "none";
-        // Mark as user-interacted when actually resized by user
-        window.userMovedWindows.add(id);
-        // Save the new size when user resizes
-        saveWindowPosition(id);
-      }
+      // Mark window as interacted with when resized
+      markWindowAsInteracted(id);
     });
     win.resizeObserver.observe(win);
   }
@@ -133,43 +116,81 @@ function openWindow(id) {
   }
 }
 
-function saveWindowPosition(windowId) {
+// Helper function to mark a window as interacted with
+function markWindowAsInteracted(windowId) {
+  if (!window.userInteractedWindows) {
+    window.userInteractedWindows = new Set();
+  }
+  window.userInteractedWindows.add(windowId);
+}
+
+// Helper function to save window state
+function saveWindowState(windowId) {
   const win = document.getElementById(windowId);
-  if (win && window.userMovedWindows && window.userMovedWindows.has(windowId)) {
-    // Only save if the window has been moved/resized by user
-    localStorage.setItem(`${windowId}-left`, win.style.left);
-    localStorage.setItem(`${windowId}-top`, win.style.top);
-    localStorage.setItem(`${windowId}-width`, win.style.width);
-    localStorage.setItem(`${windowId}-height`, win.style.height);
+  if (win && window.userInteractedWindows && window.userInteractedWindows.has(windowId)) {
+    storeValue(`${windowId}-left`, win.style.left);
+    storeValue(`${windowId}-top`, win.style.top);
+    storeValue(`${windowId}-width`, win.style.width);
+    storeValue(`${windowId}-height`, win.style.height);
   }
 }
 
-// Helper function to clear stored positions for testing
-function clearWindowMemory(windowId) {
-  if (window.userMovedWindows) {
-    window.userMovedWindows.delete(windowId);
-  }
-  localStorage.removeItem(`${windowId}-left`);
-  localStorage.removeItem(`${windowId}-top`);
-  localStorage.removeItem(`${windowId}-width`);
-  localStorage.removeItem(`${windowId}-height`);
+// Storage helper functions (using in-memory storage for Claude.ai compatibility)
+const windowStorage = {};
+
+function storeValue(key, value) {
+  windowStorage[key] = value;
 }
 
-function closeWindow(id) {
+function getStoredValue(key) {
+  return windowStorage[key];
+}
+
+function removeStoredValue(key) {
+  delete windowStorage[key];
+}
+
+// Close window function - now handles interaction tracking
+function closeWindow(id, isManualClose = false) {
   const win = document.getElementById(id);
+  if (!win) return;
   
-  // Only save position if user has actually moved/resized this window
-  if (window.userMovedWindows && window.userMovedWindows.has(id)) {
-    saveWindowPosition(id);
-  } else {
-    // User hasn't moved/resized - clear any stored positions to ensure random spawn
-    localStorage.removeItem(`${id}-left`);
-    localStorage.removeItem(`${id}-top`);
-    localStorage.removeItem(`${id}-width`);
-    localStorage.removeItem(`${id}-height`);
+  // If this is a manual close (X button), mark as interacted
+  if (isManualClose) {
+    markWindowAsInteracted(id);
+  }
+  
+  // Only save state if window has been interacted with
+  if (window.userInteractedWindows && window.userInteractedWindows.has(id)) {
+    saveWindowState(id);
   }
   
   win.style.display = "none";
+}
+
+// Enhanced escape key handler
+function handleEscapeKey(e) {
+  if (e.key === 'Escape') {
+    // Find the top-most window
+    const allWindows = document.querySelectorAll(".window");
+    let topWindow = null;
+    let maxZ = -1;
+    
+    allWindows.forEach((win) => {
+      if (win.style.display !== "none") {
+        const z = parseInt(window.getComputedStyle(win).zIndex) || 1000;
+        if (z > maxZ) {
+          maxZ = z;
+          topWindow = win;
+        }
+      }
+    });
+    
+    if (topWindow) {
+      // Close without marking as interacted (isManualClose = false)
+      closeWindow(topWindow.id, false);
+    }
+  }
 }
 
 function bringToFront(win) {
@@ -189,6 +210,7 @@ function makeDraggable(win) {
   let currentY = 0;
   let initialX = 0;
   let initialY = 0;
+  let hasMoved = false;
 
   function getEventCoordinates(e) {
     if (e.type.startsWith("touch")) {
@@ -203,6 +225,7 @@ function makeDraggable(win) {
     if (e.target.tagName === "BUTTON") return;
 
     isDragging = true;
+    hasMoved = false;
     bringToFront(win);
     const coords = getEventCoordinates(e);
     initialX = coords.x - win.offsetLeft;
@@ -214,9 +237,15 @@ function makeDraggable(win) {
 
   function duringDrag(e) {
     if (!isDragging) return;
+    
     const coords = getEventCoordinates(e);
     currentX = coords.x - initialX;
     currentY = coords.y - initialY;
+
+    // Check if window has actually moved
+    if (!hasMoved && (Math.abs(currentX - win.offsetLeft) > 5 || Math.abs(currentY - win.offsetTop) > 5)) {
+      hasMoved = true;
+    }
 
     // Clamps window to desktop so they stay within viewport
     const winWidth = win.offsetWidth || 400;
@@ -239,14 +268,12 @@ function makeDraggable(win) {
       isDragging = false;
       header.style.cursor = "move";
       
-      // Mark this window as moved by user and save position
-      const windowId = win.id;
-      if (windowId) {
-        if (!window.userMovedWindows) {
-          window.userMovedWindows = new Set();
+      // Only mark as interacted if the window actually moved
+      if (hasMoved) {
+        const windowId = win.id;
+        if (windowId) {
+          markWindowAsInteracted(windowId);
         }
-        window.userMovedWindows.add(windowId);
-        saveWindowPosition(windowId);
       }
     }
   }
@@ -266,11 +293,28 @@ function makeDraggable(win) {
   win.addEventListener("touchstart", () => bringToFront(win));
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+// Function to setup close buttons with manual close tracking
+function setupCloseButtons() {
   document.querySelectorAll(".window").forEach((win) => {
-    makeDraggable(win);
+    const closeButton = win.querySelector(".close-btn, .window-close, [data-close]");
+    if (closeButton) {
+      closeButton.addEventListener("click", () => {
+        closeWindow(win.id, true); // Mark as manual close
+      });
+    }
   });
-});
+}
+
+// Helper function to clear stored data for testing
+function clearWindowMemory(windowId) {
+  if (window.userInteractedWindows) {
+    window.userInteractedWindows.delete(windowId);
+  }
+  removeStoredValue(`${windowId}-left`);
+  removeStoredValue(`${windowId}-top`);
+  removeStoredValue(`${windowId}-width`);
+  removeStoredValue(`${windowId}-height`);
+}
 
 // Handle window resize
 window.addEventListener("resize", function () {
@@ -285,6 +329,28 @@ window.addEventListener("resize", function () {
     }
   });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Make all windows draggable
+  document.querySelectorAll(".window").forEach((win) => {
+    makeDraggable(win);
+  });
+  
+  // Setup close buttons
+  setupCloseButtons();
+  
+  // Add escape key handler
+  document.addEventListener("keydown", handleEscapeKey);
+});
+
+
+
+
+
+
+
+
+
 
 
 
@@ -338,8 +404,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
-
 // Click easter egg (if you found this by scraping my script.js then it doesn't count)
 document.addEventListener("DOMContentLoaded", function () {
   const konamiCode = [
@@ -365,37 +429,6 @@ document.addEventListener("DOMContentLoaded", function () {
       userInput = [];
     }
   });
-});
-
-
-// Keyboard shortcuts
-document.addEventListener("keydown", function (e) {
-  // Alt + Tab to cycle through open windows
-  if (e.altKey && e.key === "Tab") {
-    e.preventDefault();
-    const openWindows = Array.from(document.querySelectorAll(".window")).filter(
-      (w) => w.style.display !== "none",
-    );
-    if (openWindows.length > 0) {
-      const currentTop = openWindows.reduce((top, win) => {
-        const z = parseInt(window.getComputedStyle(win).zIndex) || 1000;
-        return z > (parseInt(window.getComputedStyle(top).zIndex) || 1000)
-          ? win
-          : top;
-      });
-      const currentIndex = openWindows.indexOf(currentTop);
-      const nextIndex = (currentIndex + 1) % openWindows.length;
-      bringToFront(openWindows[nextIndex]);
-    }
-  }
-
-  // Escape to close all windows
-  if (e.key === "Escape") {
-    document.querySelectorAll(".window").forEach((win) => {
-      win.style.display = "none";
-    });
-    document.getElementById("start-menu").style.display = "none";
-  }
 });
 
 function updateClock() {
@@ -696,17 +729,35 @@ setInitialPositions();
 renderAllIcons();
 
 document.addEventListener("DOMContentLoaded", function () {
-  updateClock(); // Run once immediately
-  setInterval(updateClock, 1000); // Then every second
+  // Initialize clock if updateClock function exists
+  if (typeof updateClock === 'function') {
+    updateClock(); // Run once immediately
+    setInterval(updateClock, 1000); // Then every second
+  }
+  
+  // Initialize scrolling track if it exists
   const track = document.querySelector(".scrolling-track");
   if (track) {
     track.innerHTML += track.innerHTML;
   }
 
-  const desktop = document.getElementById("desktop");
-
+  // Render icons
   renderAllIcons();
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
