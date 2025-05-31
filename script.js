@@ -593,7 +593,7 @@ const icons = [
     { top: 120, left: 350 }
   ),
   new Icon(
-    "Technologies",
+    "Tech Stack",
     () => openWindow("technologies-window"),
     "assets/icons/technologies.png",
     { x: 0, y: 0 },

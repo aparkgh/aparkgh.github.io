@@ -1,14 +1,14 @@
 :root {
   --main-color: #3498db;
   --font-size-lg: 1.5rem;
-  --font-family-primary: 'Free Pixel', sans-serif;
+  --font-family-primary: 'MS Sans Serif', sans-serif;
   --font-family-secondary: 'Franklin Gothic';
   --font-family-tertiary: 'Helvetica Neue Thin'
 }
 
 @font-face {
-    font-family: "Free Pixel";
-    src: url("./assets/FreePixel.ttf") format('truetype');
+    font-family: "MS Sans Serif";
+    src: url("./assets/MSSansSerif.ttf") format('truetype');
 }
 
 @font-face {
@@ -81,7 +81,7 @@ html {
 
 .icon span {
     display: block;
-    font-size: 13px;
+    font-size: 0.8rem;
     font-weight: bold;
 }
 
@@ -169,27 +169,27 @@ html {
     display: flex;
     align-items: center;
     color: white;
-    font-size: 12px;
     z-index: 2000;
     border: 2px outset #fff;
-    padding-right: 20px;
+    padding: 1px 0;
 }
 
 #start-button {
-    border: 2px outset #fff;
+    border: 3px outset #fff;
     color: black;
     cursor: pointer;
     font-weight: bold;
     display: flex;
     align-items: center;
     font-size: 1rem;
-    padding: 8px 16px;
+    padding: 3px;
+    margin: 1px 0;
     user-select: none;
 }
 
 #start-button img {
     width: 20px;
-    margin-right: 10px;
+    margin-right: 3px;
 }
 
 #start-button:active {
@@ -203,14 +203,14 @@ html {
 }
 
 #clock {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: black;
     text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 4px 8px;
-    border: 1px inset #fff;
+    padding: 8px;
+    border: 2px inset #fff;
 }
 
 #left-bar {
@@ -260,7 +260,7 @@ html {
     width: 300px;
     /* min-height: 200px; */
     background: #fafafa;
-    border: 2px outset #c0c0c0;
+    border: 3px outset #c0c0c0;
     box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
     font-size: 0.75rem;
     z-index: 2001;
