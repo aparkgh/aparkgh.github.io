@@ -146,10 +146,18 @@ html {
 }
 
 .window-buttons {
-    padding: 16px;
-    text-align: right;
-    background: #f0f0f0;
-    border-top: 1px solid #d4d0c8;
+    font-family: var(--font-family-primary);
+    border: 2px outset #fff;
+    color: black;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 15px;
+    user-select: none;
+    background-color: #fafafa;
+}
+
+.window-buttons:active {
+    border: 2px inset #fff;
 }
 
 #taskbar {
@@ -371,4 +379,3 @@ html {
         transform: translateX(-50%);
     }
 }
-

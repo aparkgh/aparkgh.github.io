@@ -83,6 +83,20 @@
                 </div>
             </div>
 
+            <div class="window" id="confirm-window">
+                <div class="window-header">
+                    Confirm
+                    <button onclick="closeWindow('confirm-window')">X</button>
+                </div>
+                <div class="window-body">
+                    <p>Are you sure you want to leave this page?</p>
+                    <div class="button-group">
+                        <button class="window-buttons" onclick="confirmLeave()">Yes</button>
+                        <button class="window-buttons" onclick="closeWindow('confirm-window')">No</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="window" id="technologies-window">
                 <div class="window-header">
                     Technologies

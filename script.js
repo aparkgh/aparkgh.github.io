@@ -44,7 +44,7 @@ function openWindow(id) {
       maxWidth = 800;
     } else if (id === 'contact-window' || id === 'projects-window' || 
                id === 'education-window' || id === 'experience-window' || 
-               id === 'technologies-window') {
+               id === 'technologies-window' || id === 'confirm-window') {
       minWidth = 350;
       maxWidth = 650;
     } else {
@@ -57,8 +57,10 @@ function openWindow(id) {
     minWidth = Math.min(minWidth, maxWidth);
     
     // Set random width within constraints
-    const randomWidth = minWidth + Math.random() * (maxWidth - minWidth);
-    win.style.width = `${Math.floor(randomWidth)}px`;
+    if (id !== 'confirm-window') {
+      const randomWidth = minWidth + Math.random() * (maxWidth - minWidth);
+      win.style.width = `${Math.floor(randomWidth)}px`;
+    }
     
     // Remove any height constraints to let content determine height
     win.style.height = 'auto';
@@ -72,24 +74,28 @@ function openWindow(id) {
     const winHeight = win.offsetHeight;
     
     // Calculate random position
-    const maxX = Math.max(0, window.innerWidth - winWidth);
-    const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
-    
     const centerX = (window.innerWidth - winWidth) / 2;
     const centerY = (window.innerHeight - winHeight) / 2;
-    
-    const offsetX = (Math.random() - 0.5) * Math.min(1000, maxX);
-    const offsetY = (Math.random() - 0.5) * Math.min(400, maxY);
-    
-    const targetX = Math.floor(centerX + offsetX);
-    const targetY = Math.floor(centerY + offsetY);
-    
-    // Clamp position to screen bounds
-    const clampedX = Math.max(0, Math.min(targetX, maxX));
-    const clampedY = Math.max(0, Math.min(targetY, maxY));
-    
-    win.style.left = `${clampedX}px`;
-    win.style.top = `${clampedY}px`;
+    if (id === 'confirm-window') {
+      win.style.left = `${Math.max(0, centerX)}px`;
+      win.style.top = `${Math.max(0, centerY)}px`;
+    } else {
+      const maxX = Math.max(0, window.innerWidth - winWidth);
+      const maxY = Math.max(0, window.innerHeight - winHeight - 40); // Leave room for taskbar
+      
+      const offsetX = (Math.random() - 0.5) * Math.min(1000, maxX);
+      const offsetY = (Math.random() - 0.5) * Math.min(400, maxY);
+      
+      const targetX = Math.floor(centerX + offsetX);
+      const targetY = Math.floor(centerY + offsetY);
+      
+      // Clamp position to screen bounds
+      const clampedX = Math.max(0, Math.min(targetX, maxX));
+      const clampedY = Math.max(0, Math.min(targetY, maxY));
+      
+      win.style.left = `${clampedX}px`;
+      win.style.top = `${clampedY}px`;
+    }
   }
   
   // Set final display properties
@@ -140,8 +146,8 @@ function openWindow(id) {
       const currentHeight = win.offsetHeight;
       
       // Only mark as interacted if there was a significant size change AND user was actively resizing
-      const widthChanged = Math.abs(currentWidth - lastWidth) > 5;
-      const heightChanged = Math.abs(currentHeight - lastHeight) > 5;
+      const widthChanged = Math.abs(currentWidth - lastWidth) > 1;
+      const heightChanged = Math.abs(currentHeight - lastHeight) > 1;
       
       if ((widthChanged || heightChanged) && isUserResizing) {
         console.log(`Window ${id} has been RESIZED by user - marking as interacted`);
@@ -564,7 +570,10 @@ const icons = [
   ),
   new Icon(
     "Zerowire",
-    () => window.open("https://github.com/aparkgh/zerowire"),
+    () => {
+      pendingLink = "https://github.com/aparkgh/zerowire";
+      openWindow("confirm-window");
+    },
     "assets/icons/zerowire.png",
     { x: 0, y: 0 },
     { top: 120, left: 350 }
@@ -592,32 +601,53 @@ const icons = [
   ),
   new Icon(
     "Snake",
-    () => openWindow("https://github.com/aparkgh/snake"),
+    () => {
+      pendingLink = "https://github.com/aparkgh/snake";
+      openWindow("confirm-window");
+    },
     "assets/icons/snake.png",
     { x: 0, y: 0 },
     { top: 250, left: 400 }
   ),
   new Icon(
     "Folder Nuker",
-    () => window.open("https://github.com/aparkgh/foldernuker"),
+    () => {
+      pendingLink = "https://github.com/aparkgh/foldernuker";
+      openWindow("confirm-window");
+    },
     "assets/icons/foldernuker.png",
     { x: 0, y: 0 },
     { top: 150, left: 200 }
   ),
   new Icon(
     "Day Counter",
-    () => window.open("https://github.com/aparkgh/daycounter"),
+    () => {
+      pendingLink = "https://github.com/aparkgh/daycounter";
+      openWindow("confirm-window");
+    },
     "assets/icons/daycounter.png",
     { x: 0, y: 0 },
     { top: 350, right: 150 }
   ),
   new Icon(
     "Spotify",
-    () =>
-      window.open("https://open.spotify.com/user/229ll5brg0pwf57snpkikhd0r"),
+    () => {
+      pendingLink = "https://open.spotify.com/user/229ll5brg0pwf57snpkikhd0r";
+      openWindow("confirm-window");
+    },
     "assets/icons/spotify.png",
     { x: 0, y: 0 },
     { top: 450, right: 320 }
+  ),
+  new Icon(
+    "TEST",
+    () => {
+      pendingLink = "https://aparkgh.github.io/assets";
+      openWindow("confirm-window");
+    },
+    "assets/icons/windows.png",
+    { x: 0, y: 0 },
+    { top: 500, right: 1000 }
   ),
 ];
 
@@ -1063,4 +1093,14 @@ function openEmail() {
       window.location.href = "mailto:andrew.park6126@gmail.com";
     }
   }
+}
+
+let pendingLink = null;
+
+function confirmLeave() {
+  if (pendingLink) {
+    window.open(pendingLink, '_blank');
+    pendingLink = null;
+  }
+  closeWindow('confirm-window');
 }
