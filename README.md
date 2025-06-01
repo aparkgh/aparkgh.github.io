@@ -24,18 +24,21 @@ Each window supports moving, resizing (only desktop), and closing. Additionally,
 ## Project Structure
 ```
 ├── assets/
+│   ├── icons/
+│   │   └── [...]
 │   ├── buttoncatch/
 │   │   ├── index.html
 │   │   ├── script.js
 │   │   └── style.css
-│   ├── icons/
-│   │   └── [...]
 │   └── [...]
-├── grainstyle.css
+├── .well-known/
+│   └── [...]
 ├── index.html
-├── script.js
 ├── style.css
-└── README.md
+├── grainstyle.css
+├── script.js
+├── README.md
+└── [...]
 ```
 
 ## License
