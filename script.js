@@ -1337,3 +1337,65 @@ function confirmLeave() {
     pendingLink = null;
     closeWindow('confirm-window');
 }
+
+// Shake detection easter egg for mobile
+let lastX = null, lastY = null, lastZ = null;
+let shakeThreshold = 15;
+let shakeCount = 0;
+let shakeTimer;
+let isShakeActive = false;
+
+// Check if device supports motion events
+if (window.DeviceMotionEvent) {
+    window.addEventListener('devicemotion', function(e) {
+        // Only run on mobile devices
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (!isMobile) return;
+        
+        let acceleration = e.accelerationIncludingGravity;
+        let curX = acceleration.x;
+        let curY = acceleration.y;
+        let curZ = acceleration.z;
+        
+        if (lastX !== null && lastY !== null && lastZ !== null) {
+            let deltaX = Math.abs(lastX - curX);
+            let deltaY = Math.abs(lastY - curY);
+            let deltaZ = Math.abs(lastZ - curZ);
+            
+            // Detect significant movement
+            if ((deltaX > shakeThreshold || deltaY > shakeThreshold || deltaZ > shakeThreshold) && !isShakeActive) {
+                shakeCount++;
+                isShakeActive = true;
+                
+                // Reset shake detection after brief pause
+                setTimeout(() => isShakeActive = false, 100);
+                
+                // Clear existing timer
+                clearTimeout(shakeTimer);
+                
+                // If we get enough shakes in sequence, trigger easter egg
+                if (shakeCount >= 3) {
+                    alert(
+                    "✨ EASTER EGG DISCOVERED ✨\n\n\n" +
+                    "A secret has been revealed somewhere..."
+                    );
+                    
+                    // Reveal the TEST icon after the secret is found
+                    revealTestIcon();
+                    shakeCount = 0;
+                } else {
+                    // Reset count if no more shakes within 1 second
+                    shakeTimer = setTimeout(() => shakeCount = 0, 1000);
+                }
+            }
+        }
+        
+        lastX = curX;
+        lastY = curY;
+        lastZ = curZ;
+    });
+}
+
+function triggerMobileEasterEgg() {
+
+}
