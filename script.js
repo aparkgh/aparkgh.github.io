@@ -902,6 +902,16 @@ const getIconElement = (icon) => {
   element.style.left = `${icon.location.x}px`;
   element.style.top = `${icon.location.y}px`;
 
+  // Cache icon dimensions after element is fully styled
+  setTimeout(() => {
+    const rect = element.getBoundingClientRect();
+    
+    icon.cachedDimensions = {
+      width: rect.width,
+      height: rect.height
+    };
+  }, 0);
+
   // Define event handlers that will be added/removed from document
   const moveInteraction = (e) => {
     if (!currentDragState.icon || currentDragState.icon !== icon) return;
@@ -929,9 +939,32 @@ const getIconElement = (icon) => {
       icon.location.x = clientX - icon.dragOffset.x;
       icon.location.y = clientY - icon.dragOffset.y;
       
-      // Keep within bounds
-      const maxX = window.innerWidth - 80;
-      const maxY = window.innerHeight - 80;
+      // Keep within bounds (accounting for taskbar and full icon size including padding)
+      const getTaskbarHeight = () => {
+        const taskbar = document.querySelector('.taskbar');
+        return taskbar ? taskbar.offsetHeight : 50; // fallback to 50px
+      };
+      
+      const getIconDimensions = () => {
+        // Use cached dimensions if available, otherwise measure
+        if (icon.cachedDimensions) {
+          return icon.cachedDimensions;
+        }
+        
+        const rect = element.getBoundingClientRect();
+        
+        return {
+          width: rect.width,
+          height: rect.height
+        };
+      };
+      
+      const taskbarHeight = getTaskbarHeight();
+      const iconDimensions = getIconDimensions();
+      
+      // Compensate for any taskbar padding/margin by allowing slight overlap
+      const maxX = window.innerWidth - iconDimensions.width;
+      const maxY = window.innerHeight - taskbarHeight - iconDimensions.height + 10;
       
       icon.location.x = Math.max(0, Math.min(maxX, icon.location.x));
       icon.location.y = Math.max(0, Math.min(maxY, icon.location.y));
