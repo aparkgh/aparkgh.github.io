@@ -1309,28 +1309,31 @@ document.addEventListener('touchmove', handleTouchMove, { passive: false });
 document.addEventListener('touchend', endSelection);
 
 function openEmail() {
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    // On mobile, open default mail client with mailto
-    window.location.href = "mailto:andrew.park6126@gmail.com";
-  } else {
-    // On desktop, open Gmail compose in new tab
-    try {
-      window.open("https://mail.google.com/mail/?view=cm&fs=1&to=andrew.park6126@gmail.com", "_blank");
-    } catch (error) {
-      // fallback to mailto if pop-up blocked or error
-      window.location.href = "mailto:andrew.park6126@gmail.com";
-    }
-  }
+    pendingLink = "EMAIL_ACTION"; // Special identifier
+    document.getElementById('confirm-window').classList.remove('rainbow-window');
+    openWindow('confirm-window');
 }
-
 let pendingLink = null;
 
 function confirmLeave() {
-  if (pendingLink) {
-    window.open(pendingLink, '_blank');
+    if (pendingLink === "EMAIL_ACTION") {
+        // Execute the original email logic
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            window.location.href = "mailto:andrew.park6126@gmail.com";
+        } else {
+            try {
+                window.open("https://mail.google.com/mail/?view=cm&fs=1&to=andrew.park6126@gmail.com", "_blank");
+            } catch (error) {
+                window.location.href = "mailto:andrew.park6126@gmail.com";
+            }
+        }
+    } else if (pendingLink) {
+        // Regular link opening
+        window.open(pendingLink, '_blank');
+    }
+    
     pendingLink = null;
-  }
-  closeWindow('confirm-window');
+    closeWindow('confirm-window');
 }

@@ -60,15 +60,14 @@
                     <button onclick="closeWindow('contact-window')">X</button>
                 </div>
                 <div class="window-body-contact">
-                    <div class="contact-icon" onclick="window.open('https://www.linkedin.com/in/andrewpark-', '_blank')">
+                    <div class="contact-icon" onclick="pendingLink = 'https://www.linkedin.com/in/andrewpark-'; document.getElementById('confirm-window').classList.remove('rainbow-window'); openWindow('confirm-window');">
                         <img src="/assets/icons/linkedin.webp" alt="LinkedIn" />
-                            <span>LinkedIn</span>
+                        <span>LinkedIn</span>
                     </div>
-                    <div class="contact-icon" onclick="window.open('https://github.com/aparkgh', '_blank')">
+                    <div class="contact-icon" onclick="pendingLink = 'https://github.com/aparkgh'; document.getElementById('confirm-window').classList.remove('rainbow-window'); openWindow('confirm-window');">
                         <img src="/assets/icons/github.png" alt="GitHub">
                         <span>GitHub</span>
                     </div>
-                    
                     <div class="contact-icon" onclick="openEmail()">
                         <img src="/assets/icons/email.png" alt="Email">
                         <span>Email</span>
