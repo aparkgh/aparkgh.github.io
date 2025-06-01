@@ -427,7 +427,7 @@ html {
 
 /* Border uses the same shared animation */
 .rainbow-window {
-  border: 3px solid;
+  border: 1px solid;
   border-image: linear-gradient(90deg,
     hsl(0, 100%, 50%),
     hsl(60, 100%, 50%),
