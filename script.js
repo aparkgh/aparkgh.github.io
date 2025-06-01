@@ -902,31 +902,7 @@ const getIconElement = (icon) => {
   element.style.left = `${icon.location.x}px`;
   element.style.top = `${icon.location.y}px`;
 
-  // Unified pointer event handling
-  const startInteraction = (e) => {
-    e.preventDefault();
-    
-    // Get coordinates (works for both mouse and touch)
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-    
-    // Set up drag state
-    currentDragState.icon = icon;
-    currentDragState.element = element;
-    currentDragState.isDragging = false;
-    currentDragState.hasMoved = false;
-    currentDragState.startTime = Date.now();
-    currentDragState.startPos = { x: clientX, y: clientY };
-    
-    // Calculate offset from pointer to icon position
-    const rect = element.getBoundingClientRect();
-    icon.dragOffset.x = clientX - rect.left;
-    icon.dragOffset.y = clientY - rect.top;
-    
-    icon.isBeingDragged = true;
-    element.style.zIndex = "1000";
-  };
-  
+  // Define event handlers that will be added/removed from document
   const moveInteraction = (e) => {
     if (!currentDragState.icon || currentDragState.icon !== icon) return;
     
@@ -973,6 +949,12 @@ const getIconElement = (icon) => {
     
     const wasClick = !currentDragState.hasMoved && (Date.now() - currentDragState.startTime < 300);
     
+    // Remove global event listeners
+    document.removeEventListener("mousemove", moveInteraction);
+    document.removeEventListener("mouseup", endInteraction);
+    document.removeEventListener("touchmove", moveInteraction);
+    document.removeEventListener("touchend", endInteraction);
+    
     // Clean up
     icon.isBeingDragged = false;
     element.style.zIndex = "auto";
@@ -991,15 +973,40 @@ const getIconElement = (icon) => {
     }
   };
 
-  // Mouse events
+  // Unified pointer event handling
+  const startInteraction = (e) => {
+    e.preventDefault();
+    
+    // Get coordinates (works for both mouse and touch)
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    // Set up drag state
+    currentDragState.icon = icon;
+    currentDragState.element = element;
+    currentDragState.isDragging = false;
+    currentDragState.hasMoved = false;
+    currentDragState.startTime = Date.now();
+    currentDragState.startPos = { x: clientX, y: clientY };
+    
+    // Calculate offset from pointer to icon position
+    const rect = element.getBoundingClientRect();
+    icon.dragOffset.x = clientX - rect.left;
+    icon.dragOffset.y = clientY - rect.top;
+    
+    icon.isBeingDragged = true;
+    element.style.zIndex = "1000";
+    
+    // Add global event listeners for move and end
+    document.addEventListener("mousemove", moveInteraction);
+    document.addEventListener("mouseup", endInteraction);
+    document.addEventListener("touchmove", moveInteraction, { passive: false });
+    document.addEventListener("touchend", endInteraction, { passive: false });
+  };
+
+  // Only add start events to the element itself
   element.addEventListener("mousedown", startInteraction);
-  element.addEventListener("mousemove", moveInteraction);
-  element.addEventListener("mouseup", endInteraction);
-  
-  // Touch events
   element.addEventListener("touchstart", startInteraction, { passive: false });
-  element.addEventListener("touchmove", moveInteraction, { passive: false });
-  element.addEventListener("touchend", endInteraction, { passive: false });
   
   // Prevent context menu
   element.addEventListener("contextmenu", (e) => e.preventDefault());
