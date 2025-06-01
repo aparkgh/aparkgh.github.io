@@ -1338,77 +1338,43 @@ function confirmLeave() {
     closeWindow('confirm-window');
 }
 
-// Enhanced shake detection easter egg for mobile
-let lastX = null, lastY = null, lastZ = null;
-let shakeThreshold = 12; // Lower threshold for more sensitivity
-let shakeCount = 0;
-let shakeTimer;
-let isShakeActive = false;
+// Five-finger hold easter egg for mobile
+let fiveFingerTimer;
+let isHolding = false;
 
-// Check if device supports motion events
-if (window.DeviceMotionEvent) {
-    // Request permission for iOS 13+
-    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(response => {
-            if (response == 'granted') {
-                addShakeListener();
-            }
-        });
-    } else {
-        addShakeListener();
+document.addEventListener('touchstart', function(e) {
+    // Check if exactly 5 fingers are touching
+    if (e.touches.length === 5 && !isHolding) {
+        isHolding = true;
+        console.log('Five fingers detected, starting timer...');
+        
+        fiveFingerTimer = setTimeout(() => {
+            triggerMobileEasterEgg();
+            isHolding = false;
+        }, 5000); // 5 seconds
     }
-}
+});
 
-function addShakeListener() {
-    window.addEventListener('devicemotion', function(e) {
-        // Only run on mobile devices
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (!isMobile) return;
-        
-        let acceleration = e.accelerationIncludingGravity;
-        if (!acceleration) return;
-        
-        let curX = acceleration.x || 0;
-        let curY = acceleration.y || 0;
-        let curZ = acceleration.z || 0;
-        
-        if (lastX !== null && lastY !== null && lastZ !== null) {
-            let deltaX = Math.abs(lastX - curX);
-            let deltaY = Math.abs(lastY - curY);
-            let deltaZ = Math.abs(lastZ - curZ);
-            let totalDelta = deltaX + deltaY + deltaZ;
-            
-            // Debug logging (remove after testing)
-            console.log('Motion detected:', totalDelta);
-            
-            // Detect significant movement
-            if (totalDelta > shakeThreshold && !isShakeActive) {
-                shakeCount++;
-                isShakeActive = true;
-                console.log('Shake count:', shakeCount);
-                
-                // Reset shake detection after brief pause
-                setTimeout(() => isShakeActive = false, 200);
-                
-                // Clear existing timer
-                clearTimeout(shakeTimer);
-                
-                // If we get enough shakes in sequence, trigger easter egg
-                if (shakeCount >= 2) { // Reduced from 3 to 2
-                    triggerMobileEasterEgg();
-                    shakeCount = 0;
-                } else {
-                    // Reset count if no more shakes within 1.5 seconds
-                    shakeTimer = setTimeout(() => shakeCount = 0, 1500);
-                }
-            }
+document.addEventListener('touchend', function(e) {
+    // If any finger is lifted, cancel the timer
+    if (e.touches.length < 5) {
+        clearTimeout(fiveFingerTimer);
+        if (isHolding) {
+            console.log('Finger lifted, canceling easter egg');
+            isHolding = false;
         }
-        
-        lastX = curX;
-        lastY = curY;
-        lastZ = curZ;
-    });
-}
+    }
+});
+
+document.addEventListener('touchmove', function(e) {
+    // Optional: Cancel if fingers move too much
+    // You can remove this if you want to allow some movement
+    if (isHolding && e.touches.length < 5) {
+        clearTimeout(fiveFingerTimer);
+        isHolding = false;
+        console.log('Movement detected, canceling easter egg');
+    }
+});
 
 function triggerMobileEasterEgg() {
     alert(
