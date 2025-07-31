@@ -76,7 +76,7 @@ html {
 .icon:hover,
 .icon.selecting {
     background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 
@@ -85,7 +85,7 @@ html {
     /* Just change background slightly for click feedback */
     background: rgba(255, 255, 255, 0.3);
     /* Keep the hover transform instead of shrinking */
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
 }
 
 /* Smooth transitions for dragging state */
@@ -829,7 +829,7 @@ html {
 }
 
 .rainbow-window .window-buttons:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
   /* Keep the same animation running on hover */
 }
