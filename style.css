@@ -298,10 +298,10 @@ html {
     cursor: w-resize;
 }
 
-/* Visual feedback on hover (optional) */
-.resize-handle:hover {
+/* Visual feedback on hover (debug) */
+/* .resize-handle:hover {
     background-color: rgba(0, 120, 212, 0.3);
-}
+} */
 
 /* Corner handles get rounded corners for better visual */
 .resize-nw, .resize-ne, .resize-sw, .resize-se {
