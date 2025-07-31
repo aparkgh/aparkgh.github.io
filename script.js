@@ -119,6 +119,284 @@ function openWindow(id) {
   }
 }
 
+function setupWindowResize(win) {
+  // Remove the default CSS resize property since we're implementing custom resize
+  win.style.resize = 'none';
+  
+  // Create resize handles for all directions
+  const handles = {
+    'nw': { cursor: 'nw-resize', position: 'top-left' },
+    'n': { cursor: 'n-resize', position: 'top' },
+    'ne': { cursor: 'ne-resize', position: 'top-right' },
+    'e': { cursor: 'e-resize', position: 'right' },
+    'se': { cursor: 'se-resize', position: 'bottom-right' },
+    's': { cursor: 's-resize', position: 'bottom' },
+    'sw': { cursor: 'sw-resize', position: 'bottom-left' },
+    'w': { cursor: 'w-resize', position: 'left' }
+  };
+
+  // Create and append resize handles
+  Object.keys(handles).forEach(direction => {
+    const handle = document.createElement('div');
+    handle.className = `resize-handle resize-${direction}`;
+    handle.style.cursor = handles[direction].cursor;
+    handle.setAttribute('data-direction', direction);
+    win.appendChild(handle);
+    
+    // Add resize functionality to each handle
+    makeResizable(win, handle, direction);
+  });
+}
+
+function makeResizable(win, handle, direction) {
+  let isResizing = false;
+  let startX, startY, startWidth, startHeight, startLeft, startTop;
+
+  function startResize(e) {
+    isResizing = true;
+    
+    // Get initial values
+    const rect = win.getBoundingClientRect();
+    startX = e.clientX || (e.touches && e.touches[0].clientX);
+    startY = e.clientY || (e.touches && e.touches[0].clientY);
+    startWidth = rect.width;
+    startHeight = rect.height;
+    startLeft = rect.left;
+    startTop = rect.top;
+    
+    // Bring window to front
+    if (typeof bringToFront === 'function') {
+      bringToFront(win);
+    }
+    
+    // Mark window as interacted
+    const windowId = win.id;
+    if (windowId && typeof markWindowAsInteracted === 'function') {
+      markWindowAsInteracted(windowId);
+    }
+    
+    // Add global event listeners
+    document.addEventListener('mousemove', doResize);
+    document.addEventListener('mouseup', stopResize);
+    document.addEventListener('touchmove', doResize, { passive: false });
+    document.addEventListener('touchend', stopResize);
+    
+    // Prevent default behavior
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function doResize(e) {
+    if (!isResizing) return;
+    
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    let newWidth = startWidth;
+    let newHeight = startHeight;
+    let newLeft = startLeft;
+    let newTop = startTop;
+    
+    // Calculate new dimensions based on direction
+    const deltaX = clientX - startX;
+    const deltaY = clientY - startY;
+    
+    // Get window constraints
+    const minWidth = parseInt(getComputedStyle(win).minWidth) || 200;
+    const minHeight = parseInt(getComputedStyle(win).minHeight) || 100;
+    const maxWidth = window.innerWidth - newLeft;
+    const maxHeight = window.innerHeight - newTop - 50; // Account for taskbar
+    
+    switch (direction) {
+      case 'nw': // Top-left
+        newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth - deltaX));
+        newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight - deltaY));
+        newLeft = startLeft + (startWidth - newWidth);
+        newTop = startTop + (startHeight - newHeight);
+        break;
+        
+      case 'n': // Top
+        newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight - deltaY));
+        newTop = startTop + (startHeight - newHeight);
+        break;
+        
+      case 'ne': // Top-right
+        newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + deltaX));
+        newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight - deltaY));
+        newTop = startTop + (startHeight - newHeight);
+        break;
+        
+      case 'e': // Right
+        newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + deltaX));
+        break;
+        
+      case 'se': // Bottom-right
+        newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + deltaX));
+        newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
+        break;
+        
+      case 's': // Bottom
+        newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
+        break;
+        
+      case 'sw': // Bottom-left
+        newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth - deltaX));
+        newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
+        newLeft = startLeft + (startWidth - newWidth);
+        break;
+        
+      case 'w': // Left
+        newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth - deltaX));
+        newLeft = startLeft + (startWidth - newWidth);
+        break;
+    }
+    
+    // Apply new dimensions and position
+    win.style.width = `${newWidth}px`;
+    win.style.height = `${newHeight}px`;
+    win.style.left = `${newLeft}px`;
+    win.style.top = `${newTop}px`;
+    
+    e.preventDefault();
+  }
+
+  function stopResize(e) {
+    if (isResizing) {
+      isResizing = false;
+      
+      // Remove global event listeners
+      document.removeEventListener('mousemove', doResize);
+      document.removeEventListener('mouseup', stopResize);
+      document.removeEventListener('touchmove', doResize);
+      document.removeEventListener('touchend', stopResize);
+      
+      e.preventDefault();
+    }
+  }
+
+  // Add event listeners to handle
+  handle.addEventListener('mousedown', startResize);
+  handle.addEventListener('touchstart', startResize, { passive: false });
+  
+  // Prevent handle from interfering with window dragging
+  handle.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+}
+
+function enhancedMakeDraggable(win) {
+  const header = win.querySelector(".window-header");
+  let isDragging = false;
+  let currentX = 0;
+  let currentY = 0;
+  let initialX = 0;
+  let initialY = 0;
+  let hasMoved = false;
+
+  function getEventCoordinates(e) {
+    if (e.type.startsWith("touch")) {
+      const touch = e.touches[0] || e.changedTouches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    } else {
+      return { x: e.clientX, y: e.clientY };
+    }
+  }
+
+  function startDrag(e) {
+    // Don't start drag if clicking on resize handles or buttons
+    if (e.target.classList.contains('resize-handle') || e.target.tagName === "BUTTON") {
+      return;
+    }
+
+    isDragging = true;
+    hasMoved = false;
+    if (typeof bringToFront === 'function') {
+      bringToFront(win);
+    }
+    
+    const coords = getEventCoordinates(e);
+    initialX = coords.x - win.offsetLeft;
+    initialY = coords.y - win.offsetTop;
+
+    header.style.cursor = "grabbing";
+    
+    // Mark as interacted immediately when drag starts
+    const windowId = win.id;
+    if (windowId && typeof markWindowAsInteracted === 'function') {
+      markWindowAsInteracted(windowId);
+    }
+    
+    e.preventDefault();
+  }
+
+  function duringDrag(e) {
+    if (!isDragging) return;
+    
+    const coords = getEventCoordinates(e);
+    currentX = coords.x - initialX;
+    currentY = coords.y - initialY;
+
+    // Mark as moved if position changes
+    if (!hasMoved && (currentX !== win.offsetLeft || currentY !== win.offsetTop)) {
+      hasMoved = true;
+    }
+
+    // Keep window within viewport
+    const winWidth = win.offsetWidth;
+    const winHeight = win.offsetHeight;
+    const taskbarHeight = 50;
+
+    const maxX = window.innerWidth - winWidth;
+    const maxY = window.innerHeight - winHeight - taskbarHeight;
+
+    currentX = Math.max(0, Math.min(currentX, maxX));
+    currentY = Math.max(0, Math.min(currentY, maxY));
+
+    win.style.left = currentX + "px";
+    win.style.top = currentY + "px";
+    e.preventDefault();
+  }
+
+  function endDrag() {
+    if (isDragging) {
+      isDragging = false;
+      header.style.cursor = "move";
+    }
+  }
+
+  // Mouse events
+  header.addEventListener("mousedown", startDrag);
+  document.addEventListener("mousemove", duringDrag);
+  document.addEventListener("mouseup", endDrag);
+
+  // Touch events
+  header.addEventListener("touchstart", startDrag, { passive: false });
+  document.addEventListener("touchmove", duringDrag, { passive: false });
+  document.addEventListener("touchend", endDrag);
+
+  // Bring window to front on interaction
+  win.addEventListener("mousedown", () => {
+    if (typeof bringToFront === 'function') {
+      bringToFront(win);
+    }
+  });
+  win.addEventListener("touchstart", () => {
+    if (typeof bringToFront === 'function') {
+      bringToFront(win);
+    }
+  });
+}
+
+function initializeWindowResize() {
+  document.querySelectorAll(".window").forEach((win) => {
+    // Setup resize handles
+    setupWindowResize(win);
+    
+    // Setup enhanced dragging (replaces your existing makeDraggable)
+    enhancedMakeDraggable(win);
+  });
+}
+
 function setupContentHeightConstraints(win, id) {
   const windowHeader = win.querySelector('.window-header');
   const windowBody = win.querySelector('.window-body') || win.querySelector('.window-body-contact');
@@ -553,11 +831,19 @@ document.addEventListener("DOMContentLoaded", function () {
     makeDraggable(win);
   });
   
-  // Setup close buttons
-  setupCloseButtons();
-  
   // Add escape key handler
   document.addEventListener("keydown", handleEscapeKey);
+
+  initializeWindowResize();
+  
+  // Also call your existing initialization code
+  if (typeof setupCloseButtons === 'function') {
+    setupCloseButtons();
+  }
+  
+  if (typeof handleEscapeKey === 'function') {
+    document.addEventListener("keydown", handleEscapeKey);
+  }
 });
 
 let resizeTimeout;

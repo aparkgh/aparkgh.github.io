@@ -217,7 +217,7 @@ html {
     /* align-items: stretch; */
     display: flex;
     flex-direction: column;
-    resize: both;
+    resize: none;
     overflow: hidden;
     display: none;
     position: absolute;
@@ -230,6 +230,230 @@ html {
     border: 1px solid #0054e3;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
     z-index: 1000;
+}
+
+.resize-handle {
+    position: absolute;
+    z-index: 10;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Corner handles (larger, easier to grab) */
+.resize-nw, .resize-ne, .resize-sw, .resize-se {
+    width: 10px;
+    height: 10px;
+}
+
+/* Edge handles */
+.resize-n, .resize-s {
+    height: 4px;
+    left: 10px;
+    right: 10px;
+}
+
+.resize-e, .resize-w {
+    width: 4px;
+    top: 10px;
+    bottom: 10px;
+}
+
+/* Position each handle */
+.resize-nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.resize-n {
+    top: -2px;
+    cursor: n-resize;
+}
+
+.resize-ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.resize-e {
+    right: -2px;
+    cursor: e-resize;
+}
+
+.resize-se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+.resize-s {
+    bottom: -2px;
+    cursor: s-resize;
+}
+
+.resize-sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.resize-w {
+    left: -2px;
+    cursor: w-resize;
+}
+
+/* Visual feedback on hover (optional) */
+.resize-handle:hover {
+    background-color: rgba(0, 120, 212, 0.3);
+}
+
+/* Corner handles get rounded corners for better visual */
+.resize-nw, .resize-ne, .resize-sw, .resize-se {
+    border-radius: 2px;
+}
+
+/* Enhanced window styles to work better with resize handles and content constraints */
+.window {
+    /* Add a subtle border to make resize area more visible */
+    box-shadow: 
+        2px 2px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(0, 0, 0, 0.1);
+    
+    /* Ensure minimum sizes (these will be overridden by dynamic calculations) */
+    min-width: 300px;
+    min-height: 150px;
+}
+
+/* Ensure content doesn't get crushed during resize */
+.window-body,
+.window-body-contact {
+    min-height: 60px; /* Minimum content area height */
+    overflow-y: auto; /* Add scroll if content is too tall */
+    box-sizing: border-box;
+}
+
+/* Ensure header has minimum space for text and buttons */
+.window-header {
+    min-height: 30px;
+    flex-shrink: 0; /* Prevent header from shrinking */
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Ensure buttons in header don't get crushed */
+.window-header button {
+    flex-shrink: 0;
+    min-width: 20px;
+    min-height: 18px;
+}
+
+/* Contact window specific constraints */
+.window-body-contact {
+    min-height: 120px; /* Ensure contact icons have space */
+}
+
+.contact-icon {
+    min-width: 80px; /* Prevent contact icons from getting too small */
+}
+
+/* Prevent scrolling text from breaking layout */
+.scrolling-text-parent {
+    flex-shrink: 0;
+    min-height: 30px;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    /* Make handles larger on mobile for easier touch interaction */
+    .resize-nw, .resize-ne, .resize-sw, .resize-se {
+        width: 15px;
+        height: 15px;
+    }
+    
+    .resize-n, .resize-s {
+        height: 8px;
+    }
+    
+    .resize-e, .resize-w {
+        width: 8px;
+    }
+    
+    /* Adjust positioning for larger handles */
+    .resize-nw {
+        top: -7px;
+        left: -7px;
+    }
+    
+    .resize-ne {
+        top: -7px;
+        right: -7px;
+    }
+    
+    .resize-se {
+        bottom: -7px;
+        right: -7px;
+    }
+    
+    .resize-sw {
+        bottom: -7px;
+        left: -7px;
+    }
+    
+    .resize-n {
+        top: -4px;
+    }
+    
+    .resize-s {
+        bottom: -4px;
+    }
+    
+    .resize-e {
+        right: -4px;
+    }
+    
+    .resize-w {
+        left: -4px;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .resize-handle:hover {
+        background-color: rgba(255, 255, 255, 0.8);
+        border: 1px solid #000;
+    }
+}
+
+/* Smooth transitions for resize operations */
+.window.resizing {
+    transition: none;
+}
+
+/* Ensure resize handles don't interfere with window content */
+.window-header,
+.window-body,
+.window-body-contact {
+    position: relative;
+    z-index: 1;
+}
+
+/* Optional: Add visual indicators for resize areas */
+.window:hover .resize-handle {
+    opacity: 0.7;
+}
+
+.resize-handle {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Show handles when window is focused or hovered */
+.window:hover .resize-handle,
+.window:focus-within .resize-handle {
+    opacity: 1;
 }
 
 .window-header {
@@ -270,6 +494,7 @@ html {
     /* height: 100%; */
     /* align-self: stretch; */
     padding: 12px 16px;
+    margin-bottom: 1rem;
     background: #f0f0f0;
     /* min-height: 100px; */
 }
@@ -281,6 +506,7 @@ html {
     cursor: pointer;
     font-size: 1rem;
     padding: 2px 15px;
+    /* margin-bottom: 1rem; */
     user-select: none;
     background-color: #fafafa;
 }
