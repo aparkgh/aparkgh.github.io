@@ -63,16 +63,13 @@ html {
     cursor: pointer;
     padding: 10px;
     border-radius: 4px;
-    /* Optimized transition for real-time resizing - shorter duration for responsiveness */
     transition: top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
                 left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
                 background 0.2s ease,
                 transform 0.2s ease;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    /* Prevent flickering during transitions and enable hardware acceleration */
     backface-visibility: hidden;
     will-change: transform, top, left;
-    /* Enable GPU acceleration for smooth real-time updates */
     transform: translateZ(0);
 }
 
@@ -80,22 +77,23 @@ html {
 .icon.selecting {
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-    /* Add subtle glow effect */
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
 }
 
 /* Active state for better feedback */
 .icon:active {
-    transform: translateY(0px) scale(0.98);
-    transition: transform 0.1s ease;
+    /* Just change background slightly for click feedback */
+    background: rgba(255, 255, 255, 0.3);
+    /* Keep the hover transform instead of shrinking */
+    transform: translateY(-2px);
 }
 
 /* Smooth transitions for dragging state */
 .icon.dragging {
     transition: background 0.2s ease;
     z-index: 1000;
-    /* Slight scale during drag for visual feedback */
-    transform: scale(1.05);
+    /* Remove the scale effect during dragging too */
+    /* transform: scale(1.05); */
 }
 
 .icon img {
@@ -128,16 +126,11 @@ html {
 /* Responsive adjustments for mobile */
 @media (max-width: 768px) {
     .icon {
-        /* Slightly faster transitions on mobile for better UX */
         transition: top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
                     left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
                     background 0.2s ease,
                     transform 0.2s ease;
-        
-        /* Ensure touch targets are large enough */
         min-height: 100px;
-        
-        /* Adjust spacing for mobile grid */
         width: 85px;
         padding: 8px;
     }
@@ -151,16 +144,16 @@ html {
         font-size: 0.85rem;
     }
     
-    /* Reduce hover effects on mobile to prevent sticky states */
     .icon:hover {
         transform: none;
         box-shadow: none;
     }
     
-    /* But keep active state for touch feedback */
+    /* Update mobile active state to not shrink */
     .icon:active {
         background: rgba(255, 255, 255, 0.3);
-        transform: scale(0.95);
+        /* Remove the scaling effect */
+        /* transform: scale(0.95); */
     }
 }
 
@@ -327,6 +320,11 @@ html {
     min-height: 150px;
 }
 
+:root {
+  --window-padding: 16px; /* Adjust this value to your preference */
+  --button-margin-bottom: 16px; /* Same as window padding for consistency */
+}
+
 /* Ensure content doesn't get crushed during resize */
 .window-body,
 .window-body-contact {
@@ -491,12 +489,10 @@ html {
 .window-body {
     flex: 1;
     overflow-y: hidden;
-    /* height: 100%; */
-    /* align-self: stretch; */
-    padding: 12px 16px;
-    margin-bottom: 1rem;
+    padding: var(--window-padding);
     background: #f0f0f0;
-    /* min-height: 100px; */
+    /* Remove the old padding declaration */
+    /* padding: 12px 16px; - REMOVE THIS LINE */
 }
 
 .window-buttons {
@@ -506,9 +502,18 @@ html {
     cursor: pointer;
     font-size: 1rem;
     padding: 2px 15px;
-    /* margin-bottom: 1rem; */
+    margin-right: 8px; /* Space between buttons */
+    margin-bottom: 0; /* Remove bottom margin that might be causing issues */
     user-select: none;
     background-color: #fafafa;
+}
+
+.window-buttons:active {
+    border: 2px inset #fff;
+}
+
+.window-buttons:last-child {
+    margin-right: 0; /* Remove margin from last button */
 }
 
 .window-buttons:active {
@@ -663,14 +668,19 @@ html {
 /* Contact icon styles */
 .window-body-contact {
     display: flex;
-    /* overflow: auto; */
-    padding: 12px 16px;
+    padding: var(--window-padding); /* Use consistent padding */
     background: #f0f0f0;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    padding: 20px;
-    
+    /* Remove the old padding declaration */
+    /* padding: 20px; - REMOVE THIS LINE */
+}
+
+.button-group {
+    margin-top: 12px; /* Space between text and buttons */
+    margin-bottom: 0; /* Remove any bottom margin */
+    padding-bottom: 0; /* Remove any bottom padding */
 }
 
 .contact-icon {
@@ -705,6 +715,7 @@ html {
 
 .scrolling-text-parent {
     overflow: hidden;
+    margin-bottom: -0.5rem;
 }
 
 .scrolling-text {
@@ -712,6 +723,8 @@ html {
     white-space: nowrap;
     background: #f0f0f0;
     border-top: 1px solid #ccc;
+    margin: 0;
+    padding: 0;
 }
 
 .scrolling-track {
