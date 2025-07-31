@@ -63,13 +63,39 @@ html {
     cursor: pointer;
     padding: 10px;
     border-radius: 4px;
-    transition: background 0.2s;
+    /* Optimized transition for real-time resizing - shorter duration for responsiveness */
+    transition: top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                background 0.2s ease,
+                transform 0.2s ease;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    /* Prevent flickering during transitions and enable hardware acceleration */
+    backface-visibility: hidden;
+    will-change: transform, top, left;
+    /* Enable GPU acceleration for smooth real-time updates */
+    transform: translateZ(0);
 }
 
 .icon:hover,
 .icon.selecting {
     background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    /* Add subtle glow effect */
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+/* Active state for better feedback */
+.icon:active {
+    transform: translateY(0px) scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* Smooth transitions for dragging state */
+.icon.dragging {
+    transition: background 0.2s ease;
+    z-index: 1000;
+    /* Slight scale during drag for visual feedback */
+    transform: scale(1.05);
 }
 
 .icon img {
@@ -77,12 +103,114 @@ html {
     height: 56px;
     margin-bottom: 4px;
     filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+    /* Smooth image transitions */
+    transition: filter 0.2s ease;
+}
+
+.icon:hover img {
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5)) 
+            drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
 }
 
 .icon span {
     display: block;
     font-size: .9rem;
     font-weight: bold;
+    /* Add transition for text shadow */
+    transition: text-shadow 0.2s ease;
+}
+
+.icon:hover span {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), 
+                 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+    .icon {
+        /* Slightly faster transitions on mobile for better UX */
+        transition: top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                    left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                    background 0.2s ease,
+                    transform 0.2s ease;
+        
+        /* Ensure touch targets are large enough */
+        min-height: 100px;
+        
+        /* Adjust spacing for mobile grid */
+        width: 85px;
+        padding: 8px;
+    }
+    
+    .icon img {
+        width: 52px;
+        height: 52px;
+    }
+    
+    .icon span {
+        font-size: 0.85rem;
+    }
+    
+    /* Reduce hover effects on mobile to prevent sticky states */
+    .icon:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* But keep active state for touch feedback */
+    .icon:active {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(0.95);
+    }
+}
+
+/* Smooth desktop icon grid container */
+#desktop-icons {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    /* Ensure smooth rendering */
+    transform: translateZ(0);
+}
+
+/* Animation for real-time resize transitions */
+@media (prefers-reduced-motion: no-preference) {
+    .icon {
+        /* Faster transitions optimized for real-time resizing */
+        transition: top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                    left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                    background 0.2s ease,
+                    transform 0.2s ease;
+    }
+    
+    /* Smooth transition during orientation changes (slightly longer) */
+    .icon.orientation-changing {
+        transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    background 0.2s ease,
+                    transform 0.2s ease;
+    }
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .icon {
+        transition: background 0.2s ease;
+    }
+    
+    .icon:hover,
+    .icon:active {
+        transform: none;
+    }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .icon:hover,
+    .icon.selecting {
+        background: rgba(255, 255, 255, 0.4);
+        border: 2px solid white;
+    }
 }
 
 .window {

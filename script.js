@@ -560,31 +560,25 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("keydown", handleEscapeKey);
 });
 
+let resizeTimeout;
 window.addEventListener('resize', () => {
-  // Re-clamp all open windows when viewport resizes
-  document.querySelectorAll('[id$="-window"]').forEach(window => {
-    if (window.style.display === 'block' || window.style.display === 'flex') {
-      const winWidth = window.offsetWidth;
-      const winHeight = window.offsetHeight;
-      const taskbarHeight = 40;
-      
-      let currentX = parseInt(window.style.left) || 0;
-      let currentY = parseInt(window.style.top) || 0;
-      
-      const maxX = window.innerWidth - winWidth;
-      const maxY = window.innerHeight - winHeight - taskbarHeight;
-      
-      currentX = Math.max(0, Math.min(currentX, maxX));
-      currentY = Math.max(0, Math.min(currentY, maxY));
-      
-      window.style.left = currentX + "px";
-      window.style.top = currentY + "px";
-    }
-  });
+  // Debounce resize events
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    setInitialPositions(true); // Enable animations
+    
+    // Update icon positions with transitions
+    icons.forEach((icon) => {
+      if (!icon.hidden) {
+        const element = document.querySelector(`[data-icon-id="${icon.text}"]`);
+        if (element) {
+          element.style.left = `${icon.location.x}px`;
+          element.style.top = `${icon.location.y}px`;
+        }
+      }
+    });
+  }, 250);
 });
-
-
-
 
 
 
@@ -844,18 +838,80 @@ const isMobile = () => {
   return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
 
+const calculateCenteredGridPositions = () => {
+  const containerWidth = window.innerWidth;
+  const containerHeight = window.innerHeight;
+  const iconWidth = 90; // Based on your CSS .icon width
+  const iconHeight = 120; // Approximate height including text
+  const padding = 20; // Space between icons
+  const columns = 3;
+  
+  // Calculate total grid width
+  const totalGridWidth = (columns * iconWidth) + ((columns - 1) * padding);
+  
+  // Calculate starting X position to center the grid
+  const startX = (containerWidth - totalGridWidth) / 2;
+  
+  // Calculate starting Y position (leaving space for top and taskbar)
+  const taskbarHeight = 50;
+  const topMargin = 60;
+  const startY = topMargin;
+  
+  const positions = [];
+  const visibleIcons = icons.filter(icon => !icon.hidden);
+  
+  visibleIcons.forEach((icon, index) => {
+    const row = Math.floor(index / columns);
+    const col = index % columns;
+    
+    const x = startX + (col * (iconWidth + padding));
+    const y = startY + (row * (iconHeight + padding));
+    
+    positions.push({ x, y });
+  });
+  
+  return positions;
+};
+
 // Set initial positions based on device type
-const setInitialPositions = () => {
+const setInitialPositions = (animate = false) => {
   if (isMobile()) {
-    // Grid layout for mobile
-    icons.forEach((icon, i) => {
-      icon.location.x = (i % 3) * 100 + 50; // 3 columns
-      icon.location.y = Math.floor(i / 3) * 100 + 50;
+    // Grid layout for mobile - centered
+    const positions = calculateCenteredGridPositions();
+    const visibleIcons = icons.filter(icon => !icon.hidden);
+    
+    visibleIcons.forEach((icon, index) => {
+      if (positions[index]) {
+        if (animate) {
+          // Enable transition temporarily
+          const element = document.querySelector(`[data-icon-id="${icon.text}"]`);
+          if (element) {
+            element.style.transition = 'top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            setTimeout(() => {
+              element.style.transition = '';
+            }, 500);
+          }
+        }
+        
+        icon.location.x = positions[index].x;
+        icon.location.y = positions[index].y;
+      }
     });
   } else {
     // Custom positioning for desktop
     icons.forEach((icon) => {
       const pos = icon.desktopPosition;
+      
+      if (animate) {
+        // Enable transition temporarily
+        const element = document.querySelector(`[data-icon-id="${icon.text}"]`);
+        if (element) {
+          element.style.transition = 'top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          setTimeout(() => {
+            element.style.transition = '';
+          }, 500);
+        }
+      }
       
       if (pos.left !== undefined) {
         icon.location.x = pos.left;
@@ -867,7 +923,6 @@ const setInitialPositions = () => {
     });
   }
 };
-
 // Global variables for drag state
 let currentDragState = {
   icon: null,
@@ -878,6 +933,7 @@ let currentDragState = {
   hasMoved: false
 };
 
+
 const getIconElement = (icon) => {
   const element = document.createElement("div");
   element.classList.add("icon");
@@ -885,6 +941,9 @@ const getIconElement = (icon) => {
   element.style.cursor = "pointer";
   element.style.userSelect = "none";
   element.style.touchAction = "none";
+  
+  // Add data attribute for easier selection
+  element.setAttribute('data-icon-id', icon.text);
 
   const image = document.createElement("img");
   image.setAttribute("alt", icon.text);
@@ -912,6 +971,7 @@ const getIconElement = (icon) => {
     };
   }, 0);
 
+  // [Keep all your existing drag and interaction code here - it remains the same]
   // Define event handlers that will be added/removed from document
   const moveInteraction = (e) => {
     if (!currentDragState.icon || currentDragState.icon !== icon) return;
@@ -932,6 +992,9 @@ const getIconElement = (icon) => {
     if (moveDistance > 8) {
       currentDragState.isDragging = true;
       currentDragState.hasMoved = true;
+      
+      // Disable transitions during drag
+      element.style.transition = 'background 0.2s';
     }
     
     if (currentDragState.isDragging) {
@@ -987,6 +1050,9 @@ const getIconElement = (icon) => {
     document.removeEventListener("mouseup", endInteraction);
     document.removeEventListener("touchmove", moveInteraction);
     document.removeEventListener("touchend", endInteraction);
+    
+    // Restore transitions after drag ends
+    element.style.transition = 'top 0.3s ease, left 0.3s ease, background 0.2s';
     
     // Clean up
     icon.isBeingDragged = false;
@@ -1047,6 +1113,8 @@ const getIconElement = (icon) => {
   return element;
 };
 
+
+// Enhanced renderAllIcons function
 const renderAllIcons = () => {
   const desktop = document.getElementById("desktop-icons");
   if (!desktop) {
@@ -1060,15 +1128,79 @@ const renderAllIcons = () => {
   // Render all icons
   icons.forEach((icon) => {
     if (!icon.hidden) {
-      desktop.appendChild(getIconElement(icon));
+      const iconElement = getIconElement(icon);
+      desktop.appendChild(iconElement);
     }
   });
 };
 
+let isResizing = false;
+let resizeEndTimeout;
+
+
 // Handle window resize to reposition icons
 window.addEventListener('resize', () => {
-  setInitialPositions();
-  renderAllIcons();
+  // Mark that we're actively resizing
+  if (!isResizing) {
+    isResizing = true;
+    // Ensure transitions are enabled for real-time resizing
+    icons.forEach((icon) => {
+      if (!icon.hidden) {
+        const element = document.querySelector(`[data-icon-id="${icon.text}"]`);
+        if (element) {
+          element.style.transition = 'top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.2s ease, transform 0.2s ease';
+        }
+      }
+    });
+  }
+  
+  // Update positions immediately during resize
+  setInitialPositions(false); // Don't add extra transition styles
+  
+  // Update icon positions in real-time
+  icons.forEach((icon) => {
+    if (!icon.hidden) {
+      const element = document.querySelector(`[data-icon-id="${icon.text}"]`);
+      if (element) {
+        element.style.left = `${icon.location.x}px`;
+        element.style.top = `${icon.location.y}px`;
+      }
+    }
+  });
+  
+  // Reset the resize end timeout
+  clearTimeout(resizeEndTimeout);
+  resizeEndTimeout = setTimeout(() => {
+    isResizing = false;
+  }, 150);
+});
+
+window.addEventListener('orientationchange', () => {
+  // Immediate update for orientation change
+  setTimeout(() => {
+    // Enable transitions for orientation change
+    icons.forEach((icon) => {
+      if (!icon.hidden) {
+        const element = document.querySelector(`[data-icon-id="${icon.text}"]`);
+        if (element) {
+          element.style.transition = 'top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.2s ease, transform 0.2s ease';
+        }
+      }
+    });
+    
+    setInitialPositions(false);
+    
+    // Update icon positions with transitions
+    icons.forEach((icon) => {
+      if (!icon.hidden) {
+        const element = document.querySelector(`[data-icon-id="${icon.text}"]`);
+        if (element) {
+          element.style.left = `${icon.location.x}px`;
+          element.style.top = `${icon.location.y}px`;
+        }
+      }
+    });
+  }, 100); // Reduced delay for more responsive feel
 });
 
 // Initialize
