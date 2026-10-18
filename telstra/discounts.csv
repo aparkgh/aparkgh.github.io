@@ -1,0 +1,15 @@
+code,amount,months,products,plans,account,service,ends,note
+THANKYOU,18,12,Mobile,Premium,Any,Existing,,
+THANKYOU,12,12,Mobile,"Basic, Essential",Any,Existing,,
+THANKYOU,7,12,"Mobile,Data",Bundle,Any,Existing,,Data & Mobile bundle
+THANKYOU,13,12,Data,"Small, Medium",Any,Existing,,
+THANKYOU,20,12,Internet,NBN above 50Mbps,Any,Existing,,
+UNLOCK,10,12,Mobile,Basic,Any,Existing,2026-11-02,"New services, Pre to Post, Port In"
+PROMO,10,12,Mobile,Basic,Any,Any,2026-11-02,
+BIZONLY,5,12,Mobile,Bundle,Business,Any,2026-11-02,
+BIZONLY,10,12,Mobile,"Basic, Essential",Business,Any,2026-11-02,
+BIZONLY,15,12,Mobile,Premium,Business,Any,2026-11-02,
+HELLO,15,12,Internet,NBN above 50Mbps,Any,New,,
+STUDENT1,19,12,Mobile,"Basic, Essential, Premium",Any,New,,Student
+STUDENT1,13,12,Data,"Small, Medium",Any,New,,Student
+TRAVEL,5,6,Data,"Small, Medium",Any,New,,

@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Promo Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: one calm column. A customer picker on top, then one section per product
+   (Mobile, Data, Internet) with a card per plan listing the offers that apply.
+   A second tab holds the discount database as an editable, spreadsheet-style table.
+   Palette borrows the whiteboard's marker ink: purple for headings and amounts,
+   teal for "good", orange for deadlines. */
+:root {
+  --bg: #F5F6FA;
+  --surface: #FFFFFF;
+  --ink: #141A2B;
+  --muted: #5E6780;
+  --line: #E2E6F0;
+  --field: #EEF0F7;
+  --accent: #5435B8;
+  --accent-soft: #EEEAFB;
+  --accent-ink: #FFFFFF;
+  --good: #0E7A6B;
+  --good-soft: #E1F3EF;
+  --warn: #A64B12;
+  --warn-soft: #FBEBDD;
+  --danger: #B3261E;
+  --danger-soft: #FBE6E4;
+  --f-display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+  --f-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1220;
+    --surface: #171B2E;
+    --ink: #ECEEF8;
+    --muted: #9AA3BE;
+    --line: #2A3050;
+    --field: #1F2441;
+    --accent: #A995FF;
+    --accent-soft: #2A2352;
+    --accent-ink: #14102B;
+    --good: #4FD1B8;
+    --good-soft: #12302C;
+    --warn: #F0A267;
+    --warn-soft: #3A2616;
+    --danger: #FF8A80;
+    --danger-soft: #3D1B19;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1220;
+  --surface: #171B2E;
+  --ink: #ECEEF8;
+  --muted: #9AA3BE;
+  --line: #2A3050;
+  --field: #1F2441;
+  --accent: #A995FF;
+  --accent-soft: #2A2352;
+  --accent-ink: #14102B;
+  --good: #4FD1B8;
+  --good-soft: #12302C;
+  --warn: #F0A267;
+  --warn-soft: #3A2616;
+  --danger: #FF8A80;
+  --danger-soft: #3D1B19;
+  color-scheme: dark;
+}
+
+html { color-scheme: light; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn.ghost { background: var(--field); color: var(--ink); }
+.btn.ghost:hover { filter: none; background: var(--accent-soft); color: var(--accent); }
+.msg.ok { color: var(--muted); }
+.linkbtn { border: 0; background: transparent; color: var(--accent); font-weight: 600; padding: 0 2px; text-decoration: underline; }
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.5 var(--f-body);
+  padding-block: 16px 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1280px; margin: 0 auto; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; margin-bottom: 14px; }
+.brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; min-width: 0; }
+h1 { font: 700 26px/1.1 var(--f-display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.sub { margin: 0; color: var(--muted); font-size: 14px; }
+.tabs { display: inline-flex; gap: 4px; padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.tabs button { border: 0; background: transparent; color: var(--muted); font-weight: 500; padding: 7px 16px; border-radius: 9px; }
+.tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); }
+
+/* Customer picker */
+.picker { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; }
+.field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; }
+.lab { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; background: var(--field); border-radius: 10px; }
+.seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 8px; font-weight: 500; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.summary { flex: 1 1 220px; margin: 0; color: var(--muted); font-size: 13px; }
+.summary b { color: var(--ink); font-weight: 600; }
+
+/* Product panels: Mobile on the left, Data and Internet stacked on the right */
+#sections { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 14px; align-items: start; }
+#sections > .state, #sections > .loading { grid-column: 1 / -1; margin: 0; }
+.col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.prod-head { display: flex; align-items: baseline; gap: 10px; padding: 12px 16px 10px; }
+.prod-head h2 { font: 700 18px/1.2 var(--f-display); letter-spacing: -0.01em; margin: 0; }
+.prod-head .count { color: var(--muted); font-size: 13px; }
+.prow { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 4px 12px; padding: 8px 16px; border-top: 1px solid var(--line); align-items: start; }
+.pname { font: 600 12px/1.2 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding-top: 17px; }
+.prow.empty { align-items: center; padding-block: 16px; }
+.prow.empty .pname { padding-top: 0; }
+.prow.empty .none { margin: 0; color: var(--muted); font-size: 13px; }
+.offers { list-style: none; margin: 0; padding: 0; min-width: 0; }
+.offer { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 12px 0; border-top: 1px solid var(--line); }
+.offer:first-child { border-top: 0; }
+.amt { font: 700 24px/1 var(--f-display); letter-spacing: -0.03em; color: var(--accent); font-variant-numeric: tabular-nums; min-width: 68px; }
+.amt .cur { font-size: 13px; vertical-align: 0.6em; margin-right: 1px; }
+.amt .off { font: 500 12px/1 var(--f-body); letter-spacing: 0; color: var(--muted); margin-left: 4px; }
+.dur { font-size: 13px; color: var(--muted); }
+.code { font: 500 12px/1 var(--f-mono); letter-spacing: 0.04em; padding: 5px 8px; border-radius: 7px; border: 1px dashed var(--accent); background: var(--accent-soft); color: var(--accent); }
+.code:hover { background: var(--accent); color: var(--accent-ink); }
+.nocode { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.pill { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 999px; background: var(--field); color: var(--muted); white-space: nowrap; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.danger { background: var(--danger-soft); color: var(--danger); }
+.pill.note { white-space: normal; }
+.state { background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; padding: 28px 22px; color: var(--muted); }
+.state strong { display: block; color: var(--ink); font: 600 17px/1.3 var(--f-display); margin-bottom: 4px; }
+.loading { color: var(--muted); }
+
+/* Wide screens: the whole page is one screen, only the inner areas scroll if they must */
+@media (min-width: 900px) {
+  html, body { height: 100%; }
+  .wrap { height: 100%; display: flex; flex-direction: column; }
+  #view-finder { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  #sections { flex: 1; min-height: 0; grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0, 1fr); }
+  .col { max-height: 100%; min-height: 0; overflow: auto; }
+  .summary { text-align: right; }
+}
+@media (max-width: 700px) { .sub { display: none; } }
+@media (max-width: 520px) { .prow { grid-template-columns: minmax(0, 1fr); } .pname { padding-top: 6px; } .prow.empty .pname { padding-top: 0; } }
+
+/* Database tab */
+.db-intro { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 10px; }
+.db-intro p { margin: 0; color: var(--muted); font-size: 13px; max-width: 62ch; flex: 1 1 320px; }
+.btn { border: 0; background: var(--accent); color: var(--accent-ink); font-weight: 600; padding: 8px 14px; border-radius: 10px; }
+.btn:hover { filter: brightness(1.08); }
+.sheet { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1180px; }
+th { position: sticky; top: 0; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: var(--field); padding: 9px 10px; white-space: nowrap; font-size: 11px; letter-spacing: 0.06em; border-bottom: 1px solid var(--line); }
+td { padding: 0; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); vertical-align: middle; }
+td:last-child, th:last-child { border-right: 0; }
+tr:last-child td { border-bottom: 0; }
+.c-code { position: sticky; left: 0; z-index: 1; background: var(--surface); }
+th.c-code { background: var(--field); z-index: 2; }
+td input, td select { width: 100%; border: 0; background: transparent; padding: 8px 10px; border-radius: 0; min-width: 0; }
+td input:focus, td select:focus { outline: none; background: var(--surface); box-shadow: inset 0 0 0 2px var(--accent); }
+td input.mono { font-family: var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; }
+td input[type="number"] { font-variant-numeric: tabular-nums; }
+.col-code { width: 104px; } .col-num { width: 76px; } .col-prod { width: 192px; } .col-plans { width: 160px; }
+.col-sel { width: 112px; } .col-date { width: 122px; } .col-note { width: 130px; } .col-status { width: 88px; } .col-del { width: 64px; }
+.ptoggle { display: flex; gap: 4px; padding: 4px 8px; }
+.ptoggle button { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 3px 9px; font-size: 12px; font-weight: 500; }
+.ptoggle button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.cell-pad { padding: 8px 10px; }
+.del { border: 0; background: transparent; color: var(--muted); padding: 8px 10px; width: 100%; text-align: left; font-size: 14px; }
+.del:hover { color: var(--danger); }
+.del.sure { color: var(--danger); font-weight: 600; }
+.msg { min-height: 20px; margin: 6px 2px 0; font-size: 14px; color: var(--danger); }
+.hint { margin: 6px 2px 0; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 520px) {
+  h1 { font-size: 27px; }
+  .picker { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+/* read-only source bar and table */
+.srcbar { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.srcline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.srcstatus { flex: 1 1 280px; margin: 0; font-size: 14px; }
+.urlin { flex: 1 1 260px; min-width: 0; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.urlin:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.srcnote { margin: 0; font-size: 13px; color: var(--warn); }
+.srcnote:empty { display: none; }
+.srcbar .hint { margin: 0; }
+table { min-width: 900px; }
+.cell { padding: 10px 12px; font-size: 14px; }
+.cell.mono { font-family: var(--f-mono); letter-spacing: 0.04em; }
+.cell.num { font-variant-numeric: tabular-nums; }
+.cell.muted { color: var(--muted); }
+.state .btn { margin-top: 14px; }
+.state p { margin: 0; }
+/* finder only */
+.srcbox { display: flex; align-items: center; gap: 6px; }
+.btn.sm { padding: 6px 12px; font-size: 13px; }
+.srcnote { margin: 8px 2px 0; font-size: 13px; color: var(--warn); }
+.srcnote:empty { display: none; }
+.cmd { margin: 10px 0 0; padding: 10px 12px; background: var(--field); border-radius: 10px; color: var(--ink); font: 13px/1.5 var(--f-mono); white-space: pre-wrap; user-select: all; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <main id="view-finder">
+    <section class="picker" aria-label="Customer">
+      <div class="field">
+        <span class="lab">Account type</span>
+        <div class="seg" id="seg-account" role="group" aria-label="Account type">
+          <button type="button" data-v="Consumer">Consumer</button>
+          <button type="button" data-v="Business">Business</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="lab">Service</span>
+        <div class="seg" id="seg-service" role="group" aria-label="Service">
+          <button type="button" data-v="Existing">Has existing service</button>
+          <button type="button" data-v="New">New service</button>
+        </div>
+      </div>
+      <p class="summary" id="summary" aria-live="polite"></p>
+      <div class="srcbox">
+        <button type="button" class="btn ghost sm" id="reload">Reload</button>
+      </div>
+    </section>
+    <p class="srcnote" id="src-note" role="status"></p>
+    <div id="sections"><p class="loading">Loading discounts…</p></div>
+  </main>
+
+</div>
+
+<script>
+(function () {
+  var COLL = 'discounts';
+  var PRODUCTS = ['Mobile', 'Data', 'Internet'];
+  var PRODUCT_TITLES = { Mobile: 'Mobile', Data: 'Data', Internet: 'Internet (NBN)' };
+  var PLAN_ORDER = {
+    Mobile: ['Basic', 'Essential', 'Premium', 'Bundle'],
+    Data: ['Small', 'Medium', 'Bundle'],
+    Internet: ['NBN above 50Mbps']
+  };
+  var LABELS = { code: 'Code', amount: 'Dollars off', months: 'Months', plans: 'Plans', account: 'Account type', service: 'Service', ends: 'Ends', note: 'Note' };
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  function h(tag, props) {
+    var e = document.createElement(tag);
+    if (props) Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v);
+    });
+    for (var i = 2; i < arguments.length; i++) append(e, arguments[i]);
+    return e;
+  }
+  function append(e, c) {
+    if (c == null || c === false) return;
+    if (Array.isArray(c)) { c.forEach(function (x) { append(e, x); }); return; }
+    e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  function list(s) {
+    return String(s || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+  function lc(s) { return String(s).toLowerCase(); }
+  function hasItem(s, item) { return list(s).some(function (x) { return lc(x) === lc(item); }); }
+
+  /* ---------- dates ---------- */
+  function today() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function parseYmd(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function daysLeft(ends) {
+    var e = parseYmd(ends);
+    return e ? Math.round((e - today()) / 864e5) : null;
+  }
+  function fmtDate(ends) {
+    var e = parseYmd(ends);
+    return e ? e.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : '';
+  }
+  function isExpired(r) { var d = daysLeft(r.ends); return d !== null && d < 0; }
+  function money(n) { n = Number(n) || 0; return Number.isInteger(n) ? String(n) : n.toFixed(2); }
+  function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
+
+  /* ---------- state ---------- */
+  var rows = [], dbState = 'loading', focusId = null;
+  var cust = { account: 'Consumer', service: 'Existing' };
+  try {
+    var saved = JSON.parse(localStorage.getItem('promoboard-customer') || 'null');
+    if (saved && (saved.account === 'Consumer' || saved.account === 'Business') && (saved.service === 'Existing' || saved.service === 'New')) cust = saved;
+  } catch (e) {}
+
+  function matches(r) {
+    var a = r.account || 'Any', s = r.service || 'Any';
+    return (a === 'Any' || a === cust.account) && (s === 'Any' || s === cust.service);
+  }
+
+  /* ---------- finder ---------- */
+  function codeBtn(code) {
+    if (!code) return h('span', { class: 'nocode', text: 'No code' });
+    var b = h('button', { type: 'button', class: 'code', title: 'Copy code', text: code });
+    b.addEventListener('click', function () {
+      function flash() { b.textContent = 'Copied'; setTimeout(function () { b.textContent = code; }, 1100); }
+      function fallback() {
+        var rg = document.createRange(); rg.selectNodeContents(b);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rg);
+      }
+      try {
+        navigator.clipboard.writeText(code).then(flash, fallback);
+      } catch (e) { fallback(); }
+    });
+    return b;
+  }
+
+  function offerItem(r, best) {
+    var d = daysLeft(r.ends), m = Number(r.months) || 0;
+    var kids = [
+      h('span', { class: 'amt' }, h('span', { class: 'cur', text: '$' }), money(r.amount), h('span', { class: 'off', text: 'off' })),
+      codeBtn(r.code),
+      h('span', { class: 'dur', text: m + ' mo' })
+    ];
+    if (best) kids.push(h('span', { class: 'pill good', text: 'Highest' }));
+    if (d !== null) kids.push(h('span', { class: 'pill' + (d <= 7 ? ' warn' : ''), text: d === 0 ? 'Ends today' : 'Ends ' + fmtDate(r.ends) + ' · ' + d + 'd left' }));
+    if (r.note) kids.push(h('span', { class: 'pill note', text: r.note }));
+    return h('li', { class: 'offer' }, kids);
+  }
+
+  function planNames(product) {
+    var names = PLAN_ORDER[product].slice();
+    rows.forEach(function (r) {
+      if (!hasItem(r.products, product)) return;
+      list(r.plans).forEach(function (p) {
+        if (!names.some(function (n) { return lc(n) === lc(p); })) names.push(p);
+      });
+    });
+    return names;
+  }
+
+  function stateCard(title, body) {
+    return h('div', { class: 'state' }, h('strong', { text: title }), body);
+  }
+
+  function renderFinder() {
+    var box = $('#sections'), sum = $('#summary');
+    box.replaceChildren();
+    sum.replaceChildren();
+    if (dbState === 'loading') { box.append(h('p', { class: 'loading', text: 'Loading discounts…' })); return; }
+    if (!rows.length) { box.append(emptyState()); return; }
+
+    var live = rows.filter(function (r) { return !isExpired(r) && matches(r); });
+    sum.append('For a ', h('b', { text: cust.account.toLowerCase() }), ' account ',
+      cust.service === 'Existing' ? 'that ' : 'opening ',
+      h('b', { text: cust.service === 'Existing' ? 'has an existing service' : 'a new service' }),
+      ', ' + plural(live.length, 'offer') + ' apply.');
+
+    var cols = [h('div', { class: 'col' }), h('div', { class: 'col' })];
+    PRODUCTS.forEach(function (p) {
+      var inProd = live.filter(function (r) { return hasItem(r.products, p); });
+      var total = 0;
+      var prows = planNames(p).map(function (name) {
+        var offers = inProd.filter(function (r) { return hasItem(r.plans, name); })
+          .sort(function (a, b) { return (Number(b.amount) || 0) - (Number(a.amount) || 0); });
+        total += offers.length;
+        if (!offers.length) {
+          return h('div', { class: 'prow empty' }, h('div', { class: 'pname', text: name }), h('p', { class: 'none', text: 'No discount for this customer' }));
+        }
+        return h('div', { class: 'prow' }, h('div', { class: 'pname', text: name }),
+          h('ul', { class: 'offers' }, offers.map(function (r, i) { return offerItem(r, offers.length > 1 && i === 0); })));
+      });
+      cols[p === 'Mobile' ? 0 : 1].append(h('section', { class: 'panel', 'aria-label': PRODUCT_TITLES[p] },
+        h('div', { class: 'prod-head' }, h('h2', { text: PRODUCT_TITLES[p] }), h('span', { class: 'count', text: plural(total, 'offer') })),
+        prows));
+    });
+    box.append(cols[0], cols[1]);
+  }
+
+  function syncSeg() {
+    [['#seg-account', 'account'], ['#seg-service', 'service']].forEach(function (pair) {
+      Array.prototype.forEach.call($(pair[0]).children, function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === cust[pair[1]]));
+      });
+    });
+  }
+  [['#seg-account', 'account'], ['#seg-service', 'service']].forEach(function (pair) {
+    $(pair[0]).addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      cust[pair[1]] = b.getAttribute('data-v');
+      try { localStorage.setItem('promoboard-customer', JSON.stringify(cust)); } catch (x) {}
+      syncSeg(); renderFinder();
+    });
+  });
+
+  /* ---------- database table ---------- */
+  /* ---------- data: read only, from discounts.csv in the same folder as this page ---------- */
+  var CSV_NAME = 'discounts.csv', CACHE_KEY = 'promoboard-csv-cache-v2';
+  var info = { at: null }, lastError = '';
+
+  /* ---------- CSV parsing ---------- */
+  var COLS = ['code', 'amount', 'months', 'products', 'plans', 'account', 'service', 'ends', 'note'];
+  function parseCsv(text) {
+    var out = [], row = [], cell = '', q = false, i, ch;
+    text = text.replace(/^﻿/, '');
+    var first = text.split(/\r?\n/)[0] || '';
+    var commas = first.split(',').length, semis = first.split(';').length, tabs = first.split('\t').length;
+    var delim = semis > commas && semis >= tabs ? ';' : (tabs > commas ? '\t' : ',');
+    for (i = 0; i < text.length; i++) {
+      ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+        else cell += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === delim) { row.push(cell); cell = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell); cell = ''; out.push(row); row = [];
+      } else cell += ch;
+    }
+    if (cell !== '' || row.length) { row.push(cell); out.push(row); }
+    return out.filter(function (r) { return r.some(function (c) { return c.trim() !== ''; }); });
+  }
+  function normDate(s) {
+    s = String(s || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+    var m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/.exec(s);
+    return m ? m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2) : '';
+  }
+  function pick(v, opts, dflt) {
+    var x = String(v || '').trim().toLowerCase();
+    for (var i = 0; i < opts.length; i++) if (opts[i].toLowerCase() === x) return opts[i];
+    return dflt;
+  }
+  function importCsv(text) {
+    var t = parseCsv(text);
+    if (t.length < 2) return { error: CSV_NAME + ' has no discount rows.' };
+    var head = t[0].map(function (x) { return x.trim().toLowerCase(); });
+    var idx = {};
+    COLS.forEach(function (c) { idx[c] = head.indexOf(c); });
+    if (idx.code < 0 || idx.amount < 0 || idx.plans < 0) {
+      return { error: 'The first row of ' + CSV_NAME + ' must name the columns, including code, amount and plans.' };
+    }
+    var out = [];
+    t.slice(1).forEach(function (r, i) {
+      function g(c) { return idx[c] < 0 ? '' : String(r[idx[c]] || '').trim(); }
+      if (!g('code') && !g('plans')) return;
+      var prods = list(g('products')).map(function (p) { return pick(p, PRODUCTS, null); }).filter(Boolean);
+      var months = Math.round(Number(g('months')));
+      out.push({
+        id: 'c' + i,
+        code: g('code').toUpperCase(),
+        amount: Math.max(0, Number(g('amount').replace(/[$,]/g, '')) || 0),
+        months: months > 0 ? months : 12,
+        products: PRODUCTS.filter(function (p) { return prods.indexOf(p) >= 0; }).join(','),
+        plans: g('plans'),
+        account: pick(g('account'), ['Consumer', 'Business'], 'Any'),
+        service: pick(g('service'), ['Existing', 'New'], 'Any'),
+        ends: normDate(g('ends')),
+        note: g('note')
+      });
+    });
+    return { rows: out };
+  }
+
+  /* ---------- loading ---------- */
+  function applyText(text) {
+    var res = importCsv(text);
+    if (res.error) return res.error;
+    rows = res.rows; dbState = 'ready'; lastError = ''; info.at = Date.now();
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ text: text, at: info.at })); } catch (e) {}
+    renderAll(); renderBar();
+    return '';
+  }
+  function useCache(reason) {
+    var c = null;
+    try { c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) {}
+    var res = c && c.text ? importCsv(c.text) : null;
+    if (res && !res.error) {
+      rows = res.rows; dbState = 'ready'; info.at = c.at;
+      lastError = reason + ' Showing the last copy that loaded.';
+    } else {
+      rows = []; dbState = 'ready'; info.at = null;
+      lastError = reason;
+    }
+    renderAll(); renderBar();
+  }
+  async function reload() {
+    var reason;
+    try {
+      var r = await fetch(CSV_NAME, { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var err = applyText(await r.text());
+      if (!err) return;
+      reason = err;
+    } catch (e) {
+      reason = 'Could not read ' + CSV_NAME + ' from this page’s folder.';
+    }
+    useCache(reason);
+  }
+  $('#reload').addEventListener('click', reload);
+
+  function renderBar() {
+    var when = info.at ? new Date(info.at).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '';
+    $('#reload').title = info.at ? plural(rows.length, 'discount') + ' from ' + CSV_NAME + ', read ' + when + '. Click to read it again.' : 'Read ' + CSV_NAME + ' again';
+    $('#src-note').textContent = rows.length ? lastError : '';
+  }
+
+  function emptyState() {
+    var page = decodeURIComponent(location.pathname.split('/').pop() || '') || 'promo-board.html';
+    if (location.protocol === 'file:') {
+      return h('div', { class: 'state' },
+        h('strong', { text: 'This page cannot read ' + CSV_NAME + ' when opened from a file' }),
+        h('p', { text: 'Browsers stop a page opened by double-click from reading other files on your computer. Serve the folder instead: open a terminal in it, run one of these, then visit the address below.' }),
+        h('pre', { class: 'cmd', text: 'python3 -m http.server 8000    (Mac)\npython -m http.server 8000     (Windows)' }),
+        h('pre', { class: 'cmd', text: 'http://localhost:8000/' + page }));
+    }
+    return h('div', { class: 'state' },
+      h('strong', { text: 'No discounts loaded' }),
+      h('p', { text: lastError || ('Put ' + CSV_NAME + ' in the same folder as this page.') }));
+  }
+
+  /* ---------- start ---------- */
+  function renderAll() { renderFinder(); }
+  syncSeg();
+  renderAll();
+  renderBar();
+  reload();
+  var lastAuto = 0;
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) return;
+    if (Date.now() - lastAuto > 5000 && location.protocol !== 'file:') { lastAuto = Date.now(); reload(); }
+    else renderAll();
+  });
+})();
+</script>
+</body>
+</html>
