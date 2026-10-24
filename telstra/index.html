@@ -214,10 +214,29 @@ table { min-width: 900px; }
 .srcnote { margin: 8px 2px 0; font-size: 13px; color: var(--warn); }
 .srcnote:empty { display: none; }
 .cmd { margin: 10px 0 0; padding: 10px 12px; background: var(--field); border-radius: 10px; color: var(--ink); font: 13px/1.5 var(--f-mono); white-space: pre-wrap; user-select: all; overflow-wrap: anywhere; }
+
+/* Password gate */
+.lock { min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.lock-card { width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px 22px; }
+.lock-card h1 { font-size: 24px; margin-bottom: 4px; }
+.lock-card p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+.lock-card input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); margin-bottom: 12px; }
+.lock-card input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.lock-card .btn { width: 100%; padding: 10px 14px; }
+.lock-err { min-height: 20px; margin: 10px 0 0; font-size: 14px; color: var(--danger); }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="lock" id="lock">
+  <form class="lock-card" id="lock-form" autocomplete="off">
+    <h1>Promo Board</h1>
+    <p>Enter the password to continue.</p>
+    <input type="password" id="lock-pw" placeholder="Password" aria-label="Password" autofocus required>
+    <button type="submit" class="btn">Unlock</button>
+    <p class="lock-err" id="lock-err" role="alert"></p>
+  </form>
+</div>
+<div class="wrap" id="app" hidden>
 
   <main id="view-finder">
     <section class="picker" aria-label="Customer">
@@ -247,7 +266,7 @@ table { min-width: 900px; }
 </div>
 
 <script>
-(function () {
+function startApp() {
   var COLL = 'discounts';
   var PRODUCTS = ['Mobile', 'Data', 'Internet'];
   var PRODUCT_TITLES = { Mobile: 'Mobile', Data: 'Data', Internet: 'Internet (NBN)' };
@@ -546,6 +565,70 @@ table { min-width: 900px; }
     if (document.hidden) return;
     if (Date.now() - lastAuto > 5000 && location.protocol !== 'file:') { lastAuto = Date.now(); reload(); }
     else renderAll();
+  });
+}
+
+/* Password gate (client-side; stores only a SHA-256 hash of the password) */
+(function () {
+  var HASH = 'ba4c1758f913a7b33925d3405a12231c8c634d6b923f6ee76d4443a14f49e4fb';
+  var KEY = 'promoboard-unlocked';
+  function sha256(str) {
+    var bytes = new TextEncoder().encode(str), K = [], H = [], p = 0, c = 2, i, j;
+    function frac(x) { return ((x - Math.floor(x)) * 4294967296) | 0; }
+    while (p < 64) {
+      var prime = true;
+      for (var d = 2; d * d <= c; d++) if (c % d === 0) { prime = false; break; }
+      if (prime) { if (p < 8) H[p] = frac(Math.pow(c, 1 / 2)); K[p] = frac(Math.pow(c, 1 / 3)); p++; }
+      c++;
+    }
+    var l = bytes.length, total = ((l + 9 + 63) >> 6) << 6, buf = new Uint8Array(total);
+    buf.set(bytes); buf[l] = 0x80;
+    var dv = new DataView(buf.buffer);
+    dv.setUint32(total - 8, Math.floor(l * 8 / 4294967296));
+    dv.setUint32(total - 4, (l * 8) >>> 0);
+    function rr(x, n) { return (x >>> n) | (x << (32 - n)); }
+    for (var o = 0; o < total; o += 64) {
+      var w = [];
+      for (i = 0; i < 16; i++) w[i] = dv.getUint32(o + i * 4);
+      for (i = 16; i < 64; i++) {
+        var s0 = rr(w[i - 15], 7) ^ rr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+        var s1 = rr(w[i - 2], 17) ^ rr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+      }
+      var a = H[0], b = H[1], cc = H[2], dd = H[3], e = H[4], f = H[5], g = H[6], hh = H[7];
+      for (i = 0; i < 64; i++) {
+        var S1 = rr(e, 6) ^ rr(e, 11) ^ rr(e, 25), ch = (e & f) ^ (~e & g);
+        var t1 = (hh + S1 + ch + K[i] + w[i]) | 0;
+        var S0 = rr(a, 2) ^ rr(a, 13) ^ rr(a, 22), mj = (a & b) ^ (a & cc) ^ (b & cc);
+        var t2 = (S0 + mj) | 0;
+        hh = g; g = f; f = e; e = (dd + t1) | 0; dd = cc; cc = b; b = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + cc) | 0; H[3] = (H[3] + dd) | 0;
+      H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + hh) | 0;
+    }
+    return H.map(function (x) { return ('00000000' + (x >>> 0).toString(16)).slice(-8); }).join('');
+  }
+  var started = false;
+  function unlock() {
+    if (started) return;
+    started = true;
+    document.getElementById('lock').hidden = true;
+    document.getElementById('app').hidden = false;
+    startApp();
+  }
+  var ok = false;
+  try { ok = sessionStorage.getItem(KEY) === HASH; } catch (e) {}
+  if (ok) { unlock(); return; }
+  document.getElementById('lock-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var pw = document.getElementById('lock-pw'), err = document.getElementById('lock-err');
+    if (sha256(pw.value) === HASH) {
+      try { sessionStorage.setItem(KEY, HASH); } catch (e) {}
+      unlock();
+    } else {
+      err.textContent = 'Incorrect password. Try again.';
+      pw.value = ''; pw.focus();
+    }
   });
 })();
 </script>
