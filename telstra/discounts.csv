@@ -19,3 +19,6 @@ N/A,19,1,Data,Prepaid,Any,New,2026-11-30,$74 28-day
 N/A,31,1,Data,Prepaid,Any,New,2026-11-30,$44 28-day
 N/A,0,4,Mobile,Prepaid,Any,New,2026-11-30,$54 28-day bonus data for 5 months
 N/A,46,4,Mobile,Prepaid,Any,New,2026-11-30,
+BIZONLY,5,12,Mobile,Bundle,Business,Any,2026-11-02,
+BIZONLY,10,12,Mobile,"Basic, Essential",Business,Any,2026-11-02,
+BIZONLY,15,12,Mobile,Premium,Business,Any,2026-11-02,
